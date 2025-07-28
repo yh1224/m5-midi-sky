@@ -1,0 +1,7 @@
+#if !defined(CONFIG_H)
+#define CONFIG_H
+
+#define DEVICE_NAME "M5 MIDI Sky"
+#define DEVICE_MANUFACTURER "hrs"
+
+#endif // !defined(CONFIG_H)
