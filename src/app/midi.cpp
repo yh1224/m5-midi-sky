@@ -3,10 +3,13 @@
 
 #include "app/midi.h"
 
+// Constants
+static constexpr int MAX_NOTES = 128;
+
 MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, MIDI);
 
 // Key states
-static bool notes[128] = {false};
+static bool notes[MAX_NOTES] = {false};
 
 /** MIDI receive task */
 [[noreturn]] void midiTask(void*)
@@ -17,7 +20,7 @@ static bool notes[128] = {false};
             case midi::NoteOn:
                 {
                     const int noteNum = MIDI.getData1();
-                    if (0 <= noteNum && noteNum < 128) {
+                    if (0 <= noteNum && noteNum < MAX_NOTES) {
                         notes[noteNum] = true;
                     }
                     break;
@@ -25,7 +28,7 @@ static bool notes[128] = {false};
             case midi::NoteOff:
                 {
                     const int noteNum = MIDI.getData1();
-                    if (0 <= noteNum && noteNum < 128) {
+                    if (0 <= noteNum && noteNum < MAX_NOTES) {
                         notes[noteNum] = false;
                     }
                     break;
@@ -40,7 +43,7 @@ static bool notes[128] = {false};
 
 void setupMIDI(const int8_t rxPin, const int8_t txPin)
 {
-    memset(notes, false, sizeof(bool) * 128);
+    memset(notes, false, sizeof(bool) * MAX_NOTES);
 
     Serial2.begin(31250, SERIAL_8N1, rxPin, txPin);
 
@@ -67,14 +70,14 @@ uint16_t getNotes15(const int transpose)
 
     uint16_t notes15 = 0;
 
-    for (int midiNote = 0; midiNote < 128; midiNote++) {
+    for (int midiNote = 0; midiNote < MAX_NOTES; midiNote++) {
         if (!notes[midiNote]) {
             continue;
         }
 
         // Apply transpose
         const int transposedNote = midiNote + transpose;
-        if (transposedNote < 0 || transposedNote >= 128) {
+        if (transposedNote < 0 || transposedNote >= MAX_NOTES) {
             continue;
         }
 
@@ -151,7 +154,7 @@ void drawKeyboard(const int transpose)
     constexpr int whiteKeyWidth = width / numWhiteKeys;
     constexpr int blackKeyWidth = whiteKeyWidth * 2 / 3;
 
-    bool activeNotes[128] = {false};
+    bool activeNotes[MAX_NOTES] = {false};
     for (const int validKeyNote : validKeyNotes) {
         activeNotes[validKeyNote - transpose] = true;
     }
