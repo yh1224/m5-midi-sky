@@ -52,7 +52,7 @@ void setupMIDI(const int8_t rxPin, const int8_t txPin)
     // Start MIDI receive task
     xTaskCreatePinnedToCore(
         midiTask,
-        "performanceTask",
+        "midiTask",
         8192,
         nullptr,
         1,
