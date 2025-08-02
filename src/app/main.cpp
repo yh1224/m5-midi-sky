@@ -39,7 +39,7 @@ void setup()
 void loop()
 {
     // Previous notes state
-    static uint16_t prevNotes15 = 0;
+    static Notes15 prevNotes15;
 
     // Touch state tracking for one-touch detection
     static bool wasTouchPressed = false;
@@ -105,24 +105,20 @@ void loop()
         drawKeyboard(currentTranspose);
     }
 
-    uint16_t notes15;
 #if defined(MODE_TEST)
-    {
-        // test mode
-        static uint16_t testNotes15 = 0;
-        static int testIndex = 14;
-        static unsigned long testPrevTs = 0;
-        const unsigned long ts = millis();
-        if (ts - testPrevTs > 500) {
-            testPrevTs = ts;
-            testNotes15 &= ~(1 << testIndex);
-            testIndex = ++testIndex % 15;
-            testNotes15 |= (1 << testIndex);
-        }
-        notes15 = testNotes15;
+    // test mode
+    static int testIndex = 14;
+    static unsigned long testPrevTs = 0;
+    const unsigned long ts = millis();
+    if (ts - testPrevTs > 500) {
+        testPrevTs = ts;
+        testIndex = ++testIndex % 15;
     }
+    unsigned long testTimestamps[15] = {0};
+    testTimestamps[testIndex] = ts;
+    Notes15 notes15(testTimestamps);
 #else
-    notes15 = getNotes15(currentTranspose);
+    Notes15 notes15 = getNotes15(currentTranspose);
 #endif
     // Update controller if there are changes
     if (currentMapping != prevMapping ||

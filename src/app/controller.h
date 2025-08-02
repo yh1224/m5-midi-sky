@@ -1,7 +1,9 @@
 #if !defined(APP_CONTROLLER_H)
 #define APP_CONTROLLER_H
 
-void updateController(uint16_t notes15, int mapping);
+#include "app/notes.h"
+
+void updateController(const Notes15& notes15, int mapping);
 
 void setupController(const char *deviceName, const char *deviceManufacturer);
 

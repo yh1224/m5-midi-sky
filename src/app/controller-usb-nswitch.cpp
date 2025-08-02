@@ -72,7 +72,7 @@ const MappingEntry* mappings[] = {
     mapping2,
 };
 
-static void applyMIDIToNSwitchGamepad(const uint16_t notes15, const int mapping)
+static void applyMIDIToNSwitchGamepad(const Notes15& notes15, const int mapping)
 {
     // Get mapping
     const MappingEntry* currentMapping = mappings[mapping - 1];
@@ -89,7 +89,7 @@ static void applyMIDIToNSwitchGamepad(const uint16_t notes15, const int mapping)
 
     // Process 15-pitch array
     for (int i = 0; i < 15; i++) {
-        if (notes15 & (1 << i)) {
+        if (notes15.get(i) != 0) {
             const MappingEntry& mappingEntry = currentMapping[i];
             switch (mappingEntry.type) {
             case ACTION_BUTTON:
@@ -172,7 +172,7 @@ static void applyMIDIToNSwitchGamepad(const uint16_t notes15, const int mapping)
     gamepad.loop();
 }
 
-void updateController(uint16_t notes15, const int mapping)
+void updateController(const Notes15& notes15, const int mapping)
 {
     M5.Display.setCursor(0, 0);
     M5.Display.setTextColor(TFT_PURPLE, TFT_BLACK);

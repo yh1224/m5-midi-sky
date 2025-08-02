@@ -40,17 +40,17 @@ const MappingEntry* mappings[] = {
 };
 
 // Previous state
-static uint16_t prevNotes15 = 0;
+static Notes15 prevNotes15;
 
-static void applyMIDIToUSBKeyboard(const uint16_t notes15, const int mapping)
+static void applyMIDIToUSBKeyboard(const Notes15& notes15, const int mapping)
 {
     // Get mapping
     const MappingEntry* currentMapping = mappings[mapping - 1];
 
     // Process 15-pitch array
     for (int i = 0; i < 15; i++) {
-        const bool currentState = (notes15 & (1 << i)) != 0;
-        const bool prevState = (prevNotes15 & (1 << i)) != 0;
+        const bool currentState = notes15.get(i) != 0;
+        const bool prevState = prevNotes15.get(i) != 0;
 
         // Send key event only when state changes
         if (currentState && !prevState) {
@@ -66,7 +66,7 @@ static void applyMIDIToUSBKeyboard(const uint16_t notes15, const int mapping)
     prevNotes15 = notes15;
 }
 
-void updateController(uint16_t notes15, const int mapping)
+void updateController(const Notes15& notes15, const int mapping)
 {
     M5.Display.setCursor(0, 0);
     M5.Display.setTextColor(TFT_CYAN, TFT_BLACK);

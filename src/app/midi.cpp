@@ -8,8 +8,8 @@ static constexpr int MAX_NOTES = 128;
 
 MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, MIDI);
 
-// Key states
-static bool notes[MAX_NOTES] = {false};
+// Key states - timestamp when each note was last pressed (0 = not pressed)
+static unsigned long notes[MAX_NOTES] = {0};
 
 /** MIDI receive task */
 [[noreturn]] void midiTask(void*)
@@ -21,7 +21,7 @@ static bool notes[MAX_NOTES] = {false};
                 {
                     const int noteNum = MIDI.getData1();
                     if (0 <= noteNum && noteNum < MAX_NOTES) {
-                        notes[noteNum] = true;
+                        notes[noteNum] = millis();
                     }
                     break;
                 }
@@ -29,7 +29,7 @@ static bool notes[MAX_NOTES] = {false};
                 {
                     const int noteNum = MIDI.getData1();
                     if (0 <= noteNum && noteNum < MAX_NOTES) {
-                        notes[noteNum] = false;
+                        notes[noteNum] = 0;
                     }
                     break;
                 }
@@ -43,7 +43,7 @@ static bool notes[MAX_NOTES] = {false};
 
 void setupMIDI(const int8_t rxPin, const int8_t txPin)
 {
-    memset(notes, false, sizeof(bool) * MAX_NOTES);
+    memset(notes, 0, sizeof(unsigned long) * MAX_NOTES);
 
     Serial2.begin(31250, SERIAL_8N1, rxPin, txPin);
 
@@ -61,17 +61,18 @@ void setupMIDI(const int8_t rxPin, const int8_t txPin)
     );
 }
 
-uint16_t getNotes15(const int transpose)
+Notes15 getNotes15(const int transpose)
 {
     // 15 pitches from C3 to C5 (48-72)
     const static int noteMapping[15] = {
         48, 50, 52, 53, 55, 57, 59, 60, 62, 64, 65, 67, 69, 71, 72,
     };
 
-    uint16_t notes15 = 0;
+    // Initialize output array to 0 (not pressed)
+    unsigned long timestamps[15] = {0};
 
     for (int midiNote = 0; midiNote < MAX_NOTES; midiNote++) {
-        if (!notes[midiNote]) {
+        if (notes[midiNote] == 0) {
             continue;
         }
 
@@ -92,13 +93,16 @@ uint16_t getNotes15(const int transpose)
         // Find corresponding index in 15-pitch array
         for (int i = 0; i < 15; i++) {
             if (noteMapping[i] == targetNote) {
-                notes15 |= (1 << i);
+                // Keep the latest timestamp for each position
+                if (timestamps[i] == 0 || notes[midiNote] > timestamps[i]) {
+                    timestamps[i] = notes[midiNote];
+                }
                 break;
             }
         }
     }
 
-    return notes15;
+    return Notes15(timestamps);
 }
 
 const char* getKey(const int transpose)
