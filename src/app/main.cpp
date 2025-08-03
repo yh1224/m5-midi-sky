@@ -5,6 +5,18 @@
 #include "app/controller.h"
 #include "app/midi.h"
 
+// Settings menu system
+enum class SettingType
+{
+    NONE = 0,
+    MAPPING = 1,
+    TRANSPOSE = 2,
+    COUNT = 3,
+};
+
+static auto currentSetting = SettingType::NONE;
+static auto prevSetting = SettingType::COUNT;
+
 // Mapping settings
 constexpr int MAPPING_MIN = 1;
 constexpr int MAPPING_MAX = 2;
@@ -33,6 +45,9 @@ void setup()
 
     currentMapping = MAPPING_DEFAULT;
     currentTranspose = TRANSPOSE_DEFAULT;
+
+    // Initialize display
+    M5.Display.fillScreen(TFT_BLACK);
 }
 
 
@@ -76,33 +91,56 @@ void loop()
         btnPressedC = true;
     }
 
-    // Button B: Switch mapping
+    // Button B: Switch setting
     if (btnPressedB) {
-        currentMapping += 1;
-        if (currentMapping > MAPPING_MAX) {
-            currentMapping = MAPPING_MIN;
+        currentSetting = static_cast<SettingType>((static_cast<int>(currentSetting) + 1) % static_cast<int>(
+            SettingType::COUNT));
+        if (currentSetting == SettingType::NONE) {
+            M5.Speaker.tone(1000, 500);
+        } else {
+            M5.Speaker.tone(1000, 100);
         }
     }
-    if (currentMapping != prevMapping) {
-        M5.Speaker.tone(2000, 100);
-        M5.Display.setCursor(0, 48);
-        M5.Display.setTextColor(TFT_WHITE, TFT_BLACK);
-        M5.Display.printf("Mapping: %d    \n", currentMapping);
+
+    // Button A/C: Change current setting value (only if a setting is selected)
+    if ((btnPressedA || btnPressedC) && currentSetting != SettingType::NONE) {
+        switch (currentSetting) {
+        case SettingType::MAPPING:
+            M5.Speaker.tone(2000, 100);
+            if (btnPressedA && currentMapping > MAPPING_MIN) {
+                currentMapping--;
+            }
+            if (btnPressedC && currentMapping < MAPPING_MAX) {
+                currentMapping++;
+            }
+            break;
+        case SettingType::TRANSPOSE:
+            M5.Speaker.tone(2000, 100);
+            if (btnPressedA && currentTranspose > TRANSPOSE_MIN) {
+                currentTranspose--;
+            }
+            if (btnPressedC && currentTranspose < TRANSPOSE_MAX) {
+                currentTranspose++;
+            }
+            break;
+        default:
+            break;
+        }
     }
 
-    // Button A/C: Change transpose
-    if (btnPressedA && currentTranspose > TRANSPOSE_MIN) {
-        currentTranspose--;
-    }
-    if (btnPressedC && currentTranspose < TRANSPOSE_MAX) {
-        currentTranspose++;
-    }
-    if (currentTranspose != prevTranspose) {
-        M5.Speaker.tone(1000, 100);
-        M5.Display.setCursor(0, 128);
-        M5.Display.setTextColor(TFT_CYAN, TFT_BLACK);
-        M5.Display.printf("Transpose: %+d (%s)     \n", currentTranspose, getKey(currentTranspose));
-        drawKeyboard(148, 320, 100, currentTranspose);
+    if (currentSetting != prevSetting ||
+        currentMapping != prevMapping ||
+        currentTranspose != prevTranspose) {
+        M5.Display.fillRect(0, 48, 320, static_cast<int>(SettingType::COUNT) * 16, TFT_BLACK);
+        M5.Display.setCursor(0, 48);
+
+        M5.Display.setTextColor(currentSetting == SettingType::MAPPING ? TFT_YELLOW : TFT_WHITE, TFT_BLACK);
+        M5.Display.printf("Mapping: %d\n", currentMapping);
+
+        M5.Display.setTextColor(currentSetting == SettingType::TRANSPOSE ? TFT_YELLOW : TFT_WHITE, TFT_BLACK);
+        M5.Display.printf("Transpose: %+d (%s)\n", currentTranspose, getKey(currentTranspose));
+
+        drawKeyboard(128, 320, 100, currentTranspose);
     }
 
 #if defined(MODE_TEST)
@@ -121,11 +159,13 @@ void loop()
     Notes15 notes15 = getNotes15(currentTranspose);
 #endif
     // Update controller if there are changes
-    if (currentMapping != prevMapping ||
+    if (currentSetting != prevSetting ||
+        currentMapping != prevMapping ||
         currentTranspose != prevTranspose ||
         notes15 != prevNotes15) {
         updateController(notes15, currentMapping);
 
+        prevSetting = currentSetting;
         prevMapping = currentMapping;
         prevTranspose = currentTranspose;
         prevNotes15 = notes15;

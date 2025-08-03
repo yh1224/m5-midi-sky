@@ -12,8 +12,9 @@ M5Stack-based MIDI to GamePad converter that translates MIDI note inputs into ga
 - **Multiple Controller Types**: Bluetooth gamepad, USB gamepad, Nintendo Switch Pro Controller, USB keyboard
 - **M5Stack Support**: Compatible with M5Stack Basic, Core2, and CoreS3
 - **MIDI Note Mapping**: Maps MIDI notes C3-C5 (48-72) to controller inputs
-- **Dual Mapping System**: Two different button/control mappings switchable via M5Stack Button B
-- **Transpose Assist**: Shift note range up/down by semitones using Button A/C, allowing you to play sheet music in different keys directly
+- **Settings Menu System**: Navigate settings with Button B, adjust values with Buttons A/C
+- **Dual Mapping System**: Two different button/control mappings
+- **Transpose Assist**: Shift note range up/down by semitones, allowing you to play sheet music in different keys directly
 
 ## Hardware Requirements
 
@@ -108,16 +109,21 @@ pio run -t upload -e M5Stack-CoreS3-USB-GAMEPAD
 
 ### Controls
 
-- **Button A**: Transpose down (lower pitch)
-- **Button B**: Switch between mapping modes (2 different control schemes)
-- **Button C**: Transpose up (higher pitch)
+- **Button A**: Decrease current setting value (when a setting is selected)
+- **Button B**: Cycle through settings (None → Mapping → Transpose → None...)
+- **Button C**: Increase current setting value (when a setting is selected)
+
+#### Settings Menu
+- **None**: Initial state - A/C buttons are disabled, press B to select a setting
+- **Mapping**: Switch between mapping modes (1-2) using A/C buttons  
+- **Transpose**: Adjust transpose value (-12 to +12 semitones) using A/C buttons
 
 ### MIDI Note Mapping
 
 The system maps 15 specific MIDI notes to controller inputs:
 - **Note Range**: C3 to C5 (MIDI notes 48, 50, 52, 53, 55, 57, 59, 60, 62, 64, 65, 67, 69, 71, 72)
 - **Mapping**: Each controller type has its own mapping table that converts these 15 positions to specific outputs
-- **Transpose**: Use Button A/C to shift the entire range up/down by semitones
+- **Transpose**: Use Button A/C to shift the entire range up/down by semitones (when Transpose setting is selected)
 
 
 ## Controller Compatibility
