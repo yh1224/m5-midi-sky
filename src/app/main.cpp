@@ -11,7 +11,8 @@ enum class SettingType
     NONE = 0,
     MAPPING = 1,
     TRANSPOSE = 2,
-    COUNT = 3,
+    SUSTAIN = 3,
+    COUNT = 4,
 };
 
 static auto currentSetting = SettingType::NONE;
@@ -31,6 +32,11 @@ constexpr int TRANSPOSE_DEFAULT = 0;
 static int currentTranspose = 0;
 static int prevTranspose = INT_MIN;
 
+// Sustain settings
+constexpr bool SUSTAIN_DEFAULT = false;
+static bool currentSustain = SUSTAIN_DEFAULT;
+static bool prevSustain = !SUSTAIN_DEFAULT;
+
 void setup()
 {
     Serial.begin(115200);
@@ -40,11 +46,12 @@ void setup()
     M5.Display.setTextSize(2);
     M5.Display.setCursor(0, 0);
 
-    setupMIDI(MIDI_GPIO_RX, MIDI_GPIO_TX);
-    setupController(DEVICE_NAME, DEVICE_MANUFACTURER);
-
     currentMapping = MAPPING_DEFAULT;
     currentTranspose = TRANSPOSE_DEFAULT;
+    currentSustain = SUSTAIN_DEFAULT;
+
+    setupMIDI(MIDI_GPIO_RX, MIDI_GPIO_TX, currentSustain);
+    setupController(DEVICE_NAME, DEVICE_MANUFACTURER);
 
     // Initialize display
     M5.Display.fillScreen(TFT_BLACK);
@@ -123,6 +130,13 @@ void loop()
                 currentTranspose++;
             }
             break;
+        case SettingType::SUSTAIN:
+            M5.Speaker.tone(2000, 100);
+            if (btnPressedA || btnPressedC) {
+                currentSustain = !currentSustain;
+                setSustainEnabled(currentSustain);
+            }
+            break;
         default:
             break;
         }
@@ -130,7 +144,8 @@ void loop()
 
     if (currentSetting != prevSetting ||
         currentMapping != prevMapping ||
-        currentTranspose != prevTranspose) {
+        currentTranspose != prevTranspose ||
+        currentSustain != prevSustain) {
         M5.Display.fillRect(0, 48, 320, static_cast<int>(SettingType::COUNT) * 16, TFT_BLACK);
         M5.Display.setCursor(0, 48);
 
@@ -139,6 +154,9 @@ void loop()
 
         M5.Display.setTextColor(currentSetting == SettingType::TRANSPOSE ? TFT_YELLOW : TFT_WHITE, TFT_BLACK);
         M5.Display.printf("Transpose: %+d (%s)\n", currentTranspose, getKey(currentTranspose));
+
+        M5.Display.setTextColor(currentSetting == SettingType::SUSTAIN ? TFT_YELLOW : TFT_WHITE, TFT_BLACK);
+        M5.Display.printf("Sustain: %s\n", currentSustain ? "ON" : "OFF");
 
         drawKeyboard(128, 320, 100, currentTranspose);
     }
@@ -162,12 +180,14 @@ void loop()
     if (currentSetting != prevSetting ||
         currentMapping != prevMapping ||
         currentTranspose != prevTranspose ||
+        currentSustain != prevSustain ||
         notes15 != prevNotes15) {
         updateController(notes15, currentMapping);
 
         prevSetting = currentSetting;
         prevMapping = currentMapping;
         prevTranspose = currentTranspose;
+        prevSustain = currentSustain;
         prevNotes15 = notes15;
     }
 

@@ -3,7 +3,9 @@
 
 #include "app/notes.h"
 
-void setupMIDI(int8_t rxPin, int8_t txPin);
+void setupMIDI(int8_t rxPin, int8_t txPin, bool enableSustain = true);
+
+void setSustainEnabled(bool enabled);
 
 Notes15 getNotes15(int transpose);
 
