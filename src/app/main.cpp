@@ -102,7 +102,7 @@ void loop()
         M5.Display.setCursor(0, 128);
         M5.Display.setTextColor(TFT_CYAN, TFT_BLACK);
         M5.Display.printf("Transpose: %+d (%s)     \n", currentTranspose, getKey(currentTranspose));
-        drawKeyboard(currentTranspose);
+        drawKeyboard(148, 320, 100, currentTranspose);
     }
 
 #if defined(MODE_TEST)

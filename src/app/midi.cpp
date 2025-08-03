@@ -124,12 +124,10 @@ const char* getKey(const int transpose)
     return KEYS[(-transpose + 24) % 12];
 }
 
-void drawKeyboard(const int transpose)
+void drawKeyboard(const int startY, const int width, const int height, const int transpose)
 {
-    constexpr int startY = 148;
-    constexpr int width = 320;
-    constexpr int whiteKeyHeight = 60;
-    constexpr int blackKeyHeight = 40;
+    const int whiteKeyHeight = height * 3 / 5;
+    const int blackKeyHeight = height * 2 / 5;
 
     // White keys (C3-C5)
     const int whiteKeyNotes[] = {
@@ -155,8 +153,8 @@ void drawKeyboard(const int transpose)
         48, 50, 52, 53, 55, 57, 59, 60, 62, 64, 65, 67, 69, 71, 72,
     };
 
-    constexpr int whiteKeyWidth = width / numWhiteKeys;
-    constexpr int blackKeyWidth = whiteKeyWidth * 2 / 3;
+    const int whiteKeyWidth = width / numWhiteKeys;
+    const int blackKeyWidth = whiteKeyWidth * 2 / 3;
 
     bool activeNotes[MAX_NOTES] = {false};
     for (const int validKeyNote : validKeyNotes) {

@@ -9,6 +9,6 @@ Notes15 getNotes15(int transpose);
 
 const char* getKey(int transpose);
 
-void drawKeyboard(int transpose);
+void drawKeyboard(int startY, int width, int height, int transpose);
 
 #endif // !defined(APP_MIDI_H)
