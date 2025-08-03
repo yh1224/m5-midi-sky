@@ -6,7 +6,8 @@
 
 #include "app/controller.h"
 
-static USBHIDKeyboard keyboard;
+// Maximum simultaneous notes
+static constexpr int MAX_SIMULTANEOUS_NOTES = 5;
 
 // Keyboard mapping entry structure
 struct MappingEntry
@@ -39,6 +40,12 @@ const MappingEntry* mappings[] = {
     mapping1,
 };
 
+// keyboard device instance
+static USBHIDKeyboard keyboard;
+
+// Filter to prevent old notes from reappearing
+static Notes15Filter noteFilter;
+
 // Previous state
 static Notes15 prevNotes15;
 
@@ -47,9 +54,12 @@ static void applyMIDIToUSBKeyboard(const Notes15& notes15, const int mapping)
     // Get mapping
     const MappingEntry* currentMapping = mappings[mapping - 1];
 
+    // Limit to latest keys for USB keyboard
+    const Notes15 latestNotes15 = noteFilter.latest(notes15, MAX_SIMULTANEOUS_NOTES);
+
     // Process 15-pitch array
     for (int i = 0; i < 15; i++) {
-        const bool currentState = notes15.get(i) != 0;
+        const bool currentState = latestNotes15.get(i) != 0;
         const bool prevState = prevNotes15.get(i) != 0;
 
         // Send key event only when state changes
@@ -61,7 +71,7 @@ static void applyMIDIToUSBKeyboard(const Notes15& notes15, const int mapping)
             keyboard.release(currentMapping[i].key);
         }
     }
-    
+
     // Update previous state
     prevNotes15 = notes15;
 }

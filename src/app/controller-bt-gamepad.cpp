@@ -7,8 +7,8 @@
 
 #include "app/controller.h"
 
-static BleCompositeHID* bleHID;
-static XboxGamepadDevice* gamepad;
+// Maximum simultaneous notes
+static constexpr int MAX_SIMULTANEOUS_NOTES = 5;
 
 // Gamepad action type constants
 static constexpr int ACTION_BUTTON = 1;
@@ -76,10 +76,22 @@ const MappingEntry* mappings[] = {
     mapping2,
 };
 
+// Bluetooth HID composite device
+static BleCompositeHID* bleHID;
+
+// gamepad device instance
+static XboxGamepadDevice* gamepad;
+
+// Filter to prevent old notes from reappearing
+static Notes15Filter noteFilter;
+
 static void applyMIDIToGamepad(const Notes15& notes15, const int mapping)
 {
     // Get mapping
     const MappingEntry* currentMapping = mappings[mapping - 1];
+
+    // Limit to latest notes for gamepad
+    const Notes15 latestNotes15 = noteFilter.latest(notes15, MAX_SIMULTANEOUS_NOTES);
 
     gamepad->resetInputs();
 
@@ -91,7 +103,7 @@ static void applyMIDIToGamepad(const Notes15& notes15, const int mapping)
     bool dpadPressed[4] = {false}; // NORTH, SOUTH, EAST, WEST
 
     for (int i = 0; i < 15; i++) {
-        if (notes15.get(i) != 0) {
+        if (latestNotes15.get(i) != 0) {
             const MappingEntry& mappingEntry = currentMapping[i];
             switch (mappingEntry.type) {
             case ACTION_BUTTON:

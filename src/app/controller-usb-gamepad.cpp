@@ -9,7 +9,8 @@
 #define GAMEPAD_VID 0x046D    // Logitech
 #define GAMEPAD_PID 0xc216    // Logitech F310 Gamepad
 
-static USBHIDGamepad gamepad;
+// Maximum simultaneous notes
+static constexpr int MAX_SIMULTANEOUS_NOTES = 5;
 
 // Gamepad action type constants
 static constexpr int ACTION_BUTTON = 1;
@@ -86,10 +87,19 @@ const MappingEntry* mappings[] = {
     mapping2,
 };
 
+// gamepad device instance
+static USBHIDGamepad gamepad;
+
+// Filter to prevent old notes from reappearing
+static Notes15Filter noteFilter;
+
 static void applyMIDIToUSBGamepad(const Notes15& notes15, const int mapping)
 {
     // Get mapping
     const MappingEntry* currentMapping = mappings[mapping - 1];
+
+    // Limit to latest notes for gamepad
+    const Notes15 latestNotes15 = noteFilter.latest(notes15, MAX_SIMULTANEOUS_NOTES);
 
     // Variables for accumulating stick input (-127 to 127 range for USB HID)
     int8_t leftThumbX = 0, leftThumbY = 0;
@@ -103,7 +113,7 @@ static void applyMIDIToUSBGamepad(const Notes15& notes15, const int mapping)
 
     // Process 15-pitch array
     for (int i = 0; i < 15; i++) {
-        if (notes15.get(i) != 0) {
+        if (latestNotes15.get(i) != 0) {
             const MappingEntry& mappingEntry = currentMapping[i];
             switch (mappingEntry.type) {
             case ACTION_BUTTON:
