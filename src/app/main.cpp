@@ -3,6 +3,7 @@
 #include <M5Unified.h>
 
 #include "app/controller.h"
+#include "app/display.h"
 #include "app/midi.h"
 
 // Settings menu system
@@ -146,19 +147,29 @@ void loop()
         currentMapping != prevMapping ||
         currentTranspose != prevTranspose ||
         currentSustain != prevSustain) {
-        M5.Display.fillRect(0, 48, 320, static_cast<int>(SettingType::COUNT) * 16, TFT_BLACK);
-        M5.Display.setCursor(0, 48);
+        if (currentSetting == SettingType::NONE || prevSetting == SettingType::NONE) {
+            // Clear screen
+            M5.Display.fillScreen(TFT_BLACK);
+            drawButtons(208, M5.Display.width(), 32, currentSetting != SettingType::NONE);
+            resetNotes();
+        }
 
-        M5.Display.setTextColor(currentSetting == SettingType::MAPPING ? TFT_YELLOW : TFT_WHITE, TFT_BLACK);
-        M5.Display.printf("Mapping: %d\n", currentMapping);
+        if (currentSetting != SettingType::NONE) {
+            // Settings menu display
+            M5.Display.fillRect(0, 48, 320, static_cast<int>(SettingType::COUNT) * 16, TFT_BLACK);
+            M5.Display.setCursor(0, 48);
 
-        M5.Display.setTextColor(currentSetting == SettingType::TRANSPOSE ? TFT_YELLOW : TFT_WHITE, TFT_BLACK);
-        M5.Display.printf("Transpose: %+d (%s)\n", currentTranspose, getKey(currentTranspose));
+            M5.Display.setTextColor(currentSetting == SettingType::MAPPING ? TFT_YELLOW : TFT_WHITE, TFT_BLACK);
+            M5.Display.printf("Mapping: %d\n", currentMapping);
 
-        M5.Display.setTextColor(currentSetting == SettingType::SUSTAIN ? TFT_YELLOW : TFT_WHITE, TFT_BLACK);
-        M5.Display.printf("Sustain: %s\n", currentSustain ? "ON" : "OFF");
+            M5.Display.setTextColor(currentSetting == SettingType::TRANSPOSE ? TFT_YELLOW : TFT_WHITE, TFT_BLACK);
+            M5.Display.printf("Transpose: %+d (%s)\n", currentTranspose, getKey(currentTranspose));
 
-        drawKeyboard(128, 320, 100, currentTranspose);
+            M5.Display.setTextColor(currentSetting == SettingType::SUSTAIN ? TFT_YELLOW : TFT_WHITE, TFT_BLACK);
+            M5.Display.printf("Sustain: %s\n", currentSustain ? "ON" : "OFF");
+
+            drawKeyboard(128, 320, 100, currentTranspose);
+        }
     }
 
 #if defined(MODE_TEST)
@@ -183,6 +194,11 @@ void loop()
         currentSustain != prevSustain ||
         notes15 != prevNotes15) {
         updateController(notes15, currentMapping);
+
+        // Display notes when not in settings mode
+        if (currentSetting == SettingType::NONE) {
+            drawNotes(notes15, 32, 320, 160, 16);
+        }
 
         prevSetting = currentSetting;
         prevMapping = currentMapping;

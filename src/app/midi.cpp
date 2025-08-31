@@ -115,7 +115,7 @@ void setupMIDI(const int8_t rxPin, const int8_t txPin, const bool enableSustain)
 void setSustainEnabled(const bool enabled)
 {
     sustainEnabled = enabled;
-    
+
     // If sustain is disabled, immediately turn off all sustained notes
     if (!enabled && sustainPedal) {
         for (int i = 0; i < MAX_NOTES; i++) {
