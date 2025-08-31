@@ -3,7 +3,7 @@
 
 #include "app/notes.h"
 
-void setupMIDI(int8_t rxPin, int8_t txPin, bool enableSustain = true);
+void setupMIDI(int8_t rxPin, int8_t txPin);
 
 void setSustainEnabled(bool enabled);
 

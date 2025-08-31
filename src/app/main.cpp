@@ -5,38 +5,7 @@
 #include "app/controller.h"
 #include "app/display.h"
 #include "app/midi.h"
-
-// Settings menu system
-enum class SettingType
-{
-    NONE = 0,
-    MAPPING = 1,
-    TRANSPOSE = 2,
-    SUSTAIN = 3,
-    COUNT = 4,
-};
-
-static auto currentSetting = SettingType::NONE;
-static auto prevSetting = SettingType::COUNT;
-
-// Mapping settings
-constexpr int MAPPING_MIN = 1;
-constexpr int MAPPING_MAX = 2;
-constexpr int MAPPING_DEFAULT = 1;
-static int currentMapping = 0;
-static int prevMapping = INT_MIN;
-
-// Transpose settings
-constexpr int TRANSPOSE_MIN = -12;
-constexpr int TRANSPOSE_MAX = 12;
-constexpr int TRANSPOSE_DEFAULT = 0;
-static int currentTranspose = 0;
-static int prevTranspose = INT_MIN;
-
-// Sustain settings
-constexpr bool SUSTAIN_DEFAULT = false;
-static bool currentSustain = SUSTAIN_DEFAULT;
-static bool prevSustain = !SUSTAIN_DEFAULT;
+#include "app/settings.h"
 
 void setup()
 {
@@ -46,21 +15,21 @@ void setup()
     M5.begin(cfg);
     M5.Display.setTextSize(2);
     M5.Display.setCursor(0, 0);
+    M5.Speaker.setVolume(20);
 
-    currentMapping = MAPPING_DEFAULT;
-    currentTranspose = TRANSPOSE_DEFAULT;
-    currentSustain = SUSTAIN_DEFAULT;
-
-    setupMIDI(MIDI_GPIO_RX, MIDI_GPIO_TX, currentSustain);
+    setupMIDI(MIDI_GPIO_RX, MIDI_GPIO_TX);
     setupController(DEVICE_NAME, DEVICE_MANUFACTURER);
 
     // Initialize display
-    M5.Display.fillScreen(TFT_BLACK);
+    resetDisplay(false);
 }
 
 
 void loop()
 {
+    static Settings settings;
+    static bool previousSettingsMode = false;
+
     // Previous notes state
     static Notes15 prevNotes15;
 
@@ -78,7 +47,7 @@ void loop()
     const bool touchJustPressed = isTouchPressed && !wasTouchPressed;
     wasTouchPressed = isTouchPressed;
     if (touchJustPressed) {
-        auto t = M5.Touch.getDetail();
+        const auto t = M5.Touch.getDetail();
         if (200 <= t.y && t.y < 240) {
             if (0 <= t.x && t.x < 106) {
                 btnPressedA = true;
@@ -98,77 +67,17 @@ void loop()
     if (M5.BtnC.wasPressed()) {
         btnPressedC = true;
     }
-
-    // Button B: Switch setting
-    if (btnPressedB) {
-        currentSetting = static_cast<SettingType>((static_cast<int>(currentSetting) + 1) % static_cast<int>(
-            SettingType::COUNT));
-        if (currentSetting == SettingType::NONE) {
-            M5.Speaker.tone(1000, 500);
-        } else {
-            M5.Speaker.tone(1000, 100);
-        }
-    }
-
-    // Button A/C: Change current setting value (only if a setting is selected)
-    if ((btnPressedA || btnPressedC) && currentSetting != SettingType::NONE) {
-        switch (currentSetting) {
-        case SettingType::MAPPING:
-            M5.Speaker.tone(2000, 100);
-            if (btnPressedA && currentMapping > MAPPING_MIN) {
-                currentMapping--;
+    if (btnPressedA || btnPressedB || btnPressedC) {
+        // Process setting button presses
+        if (settings.processButtons(btnPressedA, btnPressedB, btnPressedC)) {
+            const auto isSettingsMode = settings.isSettingsMode();
+            if (isSettingsMode != previousSettingsMode) {
+                resetDisplay(isSettingsMode);
             }
-            if (btnPressedC && currentMapping < MAPPING_MAX) {
-                currentMapping++;
+            if (isSettingsMode) {
+                drawSettings(settings);
             }
-            break;
-        case SettingType::TRANSPOSE:
-            M5.Speaker.tone(2000, 100);
-            if (btnPressedA && currentTranspose > TRANSPOSE_MIN) {
-                currentTranspose--;
-            }
-            if (btnPressedC && currentTranspose < TRANSPOSE_MAX) {
-                currentTranspose++;
-            }
-            break;
-        case SettingType::SUSTAIN:
-            M5.Speaker.tone(2000, 100);
-            if (btnPressedA || btnPressedC) {
-                currentSustain = !currentSustain;
-                setSustainEnabled(currentSustain);
-            }
-            break;
-        default:
-            break;
-        }
-    }
-
-    if (currentSetting != prevSetting ||
-        currentMapping != prevMapping ||
-        currentTranspose != prevTranspose ||
-        currentSustain != prevSustain) {
-        if (currentSetting == SettingType::NONE || prevSetting == SettingType::NONE) {
-            // Clear screen
-            M5.Display.fillScreen(TFT_BLACK);
-            drawButtons(208, M5.Display.width(), 32, currentSetting != SettingType::NONE);
-            resetNotes();
-        }
-
-        if (currentSetting != SettingType::NONE) {
-            // Settings menu display
-            M5.Display.fillRect(0, 48, 320, static_cast<int>(SettingType::COUNT) * 16, TFT_BLACK);
-            M5.Display.setCursor(0, 48);
-
-            M5.Display.setTextColor(currentSetting == SettingType::MAPPING ? TFT_YELLOW : TFT_WHITE, TFT_BLACK);
-            M5.Display.printf("Mapping: %d\n", currentMapping);
-
-            M5.Display.setTextColor(currentSetting == SettingType::TRANSPOSE ? TFT_YELLOW : TFT_WHITE, TFT_BLACK);
-            M5.Display.printf("Transpose: %+d (%s)\n", currentTranspose, getKey(currentTranspose));
-
-            M5.Display.setTextColor(currentSetting == SettingType::SUSTAIN ? TFT_YELLOW : TFT_WHITE, TFT_BLACK);
-            M5.Display.printf("Sustain: %s\n", currentSustain ? "ON" : "OFF");
-
-            drawKeyboard(128, 320, 100, currentTranspose);
+            previousSettingsMode = isSettingsMode;
         }
     }
 
@@ -183,27 +92,19 @@ void loop()
     }
     unsigned long testTimestamps[15] = {0};
     testTimestamps[testIndex] = ts;
-    Notes15 notes15(testTimestamps);
+    const Notes15 notes15{testTimestamps};
 #else
-    Notes15 notes15 = getNotes15(currentTranspose);
+    Notes15 notes15 = getNotes15(settings.getTranspose());
 #endif
     // Update controller if there are changes
-    if (currentSetting != prevSetting ||
-        currentMapping != prevMapping ||
-        currentTranspose != prevTranspose ||
-        currentSustain != prevSustain ||
-        notes15 != prevNotes15) {
-        updateController(notes15, currentMapping);
+    if (notes15 != prevNotes15) {
+        updateController(notes15, settings.getMapping());
 
         // Display notes when not in settings mode
-        if (currentSetting == SettingType::NONE) {
+        if (!settings.isSettingsMode()) {
             drawNotes(notes15, 32, 320, 160, 16);
         }
 
-        prevSetting = currentSetting;
-        prevMapping = currentMapping;
-        prevTranspose = currentTranspose;
-        prevSustain = currentSustain;
         prevNotes15 = notes15;
     }
 

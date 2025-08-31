@@ -3,10 +3,10 @@
 
 #include "app/notes.h"
 
-void resetNotes();
+void resetDisplay(bool settingsMode);
 
 void drawNotes(const Notes15& notes15, int startY, int width, int height, int spacing);
 
-void drawButtons(int startY, int width, int height, bool withSelect);
+void drawButtons(int startY, int width, int height, bool buttonA, bool buttonC);
 
 #endif // !defined(APP_DISPLAY_H)

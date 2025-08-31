@@ -9,8 +9,6 @@ static constexpr int MAX_NOTES = 128;
 // Duration to temporarily turn off key during repress
 static constexpr unsigned long REPRESS_KEY_OFF_DURATION_MS = 50;
 
-MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, MIDI);
-
 // Global flag to enable/disable sustain pedal processing
 static bool sustainEnabled = false;
 
@@ -25,6 +23,8 @@ static unsigned long repressedTime[MAX_NOTES] = {};
 
 // Sustain pedal state
 static bool sustainPedal = false;
+
+MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, MIDI);
 
 /** MIDI receive task */
 [[noreturn]] void midiTask(void*)
@@ -88,10 +88,9 @@ static bool sustainPedal = false;
     }
 }
 
-void setupMIDI(const int8_t rxPin, const int8_t txPin, const bool enableSustain)
+void setupMIDI(const int8_t rxPin, const int8_t txPin)
 {
     Serial2.begin(31250, SERIAL_8N1, rxPin, txPin);
-    sustainEnabled = enableSustain;
 
     memset(notes, 0, sizeof(unsigned long) * MAX_NOTES);
     memset(physicallyPressed, false, sizeof(bool) * MAX_NOTES);

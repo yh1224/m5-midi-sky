@@ -1,13 +1,15 @@
 #include <M5Unified.h>
-#include <MIDI.h>
 
+#include "app/display.h"
 #include "app/midi.h"
 
 static bool prevPressed[15] = {false};
 static bool firstDraw = true;
 
-void resetNotes()
+void resetDisplay(const bool settingsMode)
 {
+    M5.Display.fillScreen(TFT_BLACK);
+    drawButtons(208, M5.Display.width(), 32, settingsMode, settingsMode);
     firstDraw = true;
 }
 
@@ -46,7 +48,7 @@ void drawNotes(const Notes15& notes15, const int startY, const int width, const 
     firstDraw = false;
 }
 
-void drawButtons(const int startY, const int width, const int height, const bool withSelect)
+void drawButtons(const int startY, const int width, const int height, const bool buttonA, const bool buttonC)
 {
     const int buttonWidth = width / 3;
 
@@ -59,6 +61,17 @@ void drawButtons(const int startY, const int width, const int height, const bool
     const int y = startY + height / 2;
     const int size = height / 4;
 
+    // Button A
+    if (buttonA) {
+        const int xa = buttonWidth / 2;
+        M5.Display.fillTriangle(
+            xa - size / 2, y, // Left point
+            xa + size / 2, y - size, // Top right
+            xa + size / 2, y + size, // Bottom right
+            TFT_WHITE
+        );
+    }
+
     // Button B
     const int xb = buttonWidth + buttonWidth / 2;
     M5.Display.fillTriangle(
@@ -68,17 +81,8 @@ void drawButtons(const int startY, const int width, const int height, const bool
         TFT_WHITE
     );
 
-    if (withSelect) {
-        // Button A
-        const int xa = buttonWidth / 2;
-        M5.Display.fillTriangle(
-            xa - size / 2, y, // Left point
-            xa + size / 2, y - size, // Top right
-            xa + size / 2, y + size, // Bottom right
-            TFT_WHITE
-        );
-
-        // Button C
+    // Button C
+    if (buttonC) {
         const int xc = 2 * buttonWidth + buttonWidth / 2;
         M5.Display.fillTriangle(
             xc + size / 2, y, // Right point
