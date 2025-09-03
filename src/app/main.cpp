@@ -27,6 +27,9 @@ void setup()
 
 void loop()
 {
+    static bool firstDraw = true;
+
+    // Settings
     static Settings settings;
     static bool previousSettingsMode = false;
 
@@ -73,6 +76,7 @@ void loop()
             const auto isSettingsMode = settings.isSettingsMode();
             if (isSettingsMode != previousSettingsMode) {
                 resetDisplay(isSettingsMode);
+                firstDraw = true;
             }
             if (isSettingsMode) {
                 drawSettings(settings);
@@ -94,18 +98,19 @@ void loop()
     testTimestamps[testIndex] = ts;
     const Notes15 notes15{testTimestamps};
 #else
-    Notes15 notes15 = getNotes15(settings.getTranspose());
+    const Notes15 notes15 = getNotes15(settings.getTranspose());
 #endif
     // Update controller if there are changes
-    if (notes15 != prevNotes15) {
+    if (firstDraw || notes15 != prevNotes15) {
         updateController(notes15, settings.getMapping());
 
         // Display notes when not in settings mode
         if (!settings.isSettingsMode()) {
-            drawNotes(notes15, 32, 320, 160, 16);
+            drawNotes(notes15, 32, 320, 160, 16, firstDraw);
         }
 
         prevNotes15 = notes15;
+        firstDraw = false;
     }
 
     delay(1);

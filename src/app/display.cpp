@@ -4,16 +4,14 @@
 #include "app/midi.h"
 
 static bool prevPressed[15] = {false};
-static bool firstDraw = true;
 
 void resetDisplay(const bool settingsMode)
 {
     M5.Display.fillScreen(TFT_BLACK);
     drawButtons(208, M5.Display.width(), 32, settingsMode, settingsMode);
-    firstDraw = true;
 }
 
-void drawNotes(const Notes15& notes15, const int startY, const int width, const int height, const int spacing)
+void drawNotes(const Notes15& notes15, const int startY, const int width, const int height, const int spacing, const bool firstDraw)
 {
     // Calculate square size to fit 5 columns with spacing in given area
     const int availableWidth = width - (spacing * 6); // 6 spaces: left, 4 between, right
@@ -44,8 +42,6 @@ void drawNotes(const Notes15& notes15, const int startY, const int width, const 
             prevPressed[i] = isPressed;
         }
     }
-
-    firstDraw = false;
 }
 
 void drawButtons(const int startY, const int width, const int height, const bool buttonA, const bool buttonC)
