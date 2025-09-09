@@ -19,7 +19,8 @@ M5StackベースのMIDI to GamePadコンバーターで、MIDI音符入力をゲ
 ## ハードウェア要件
 
 - M5Stackデバイス（Basic、Core2、またはCoreSS3）
-- MIDI Unit for GROVE by necobit (https://necobit.booth.pm/items/5806265)
+- [Unit MIDI](https://docs.m5stack.com/en/unit/Unit-MIDI)
+  - または MIDI Unit for GROVE by necobit (https://necobit.booth.pm/items/5806265)
 - USBモード用: M5Stack CoreS3のみ
 
 ## 接続図
@@ -27,7 +28,7 @@ M5StackベースのMIDI to GamePadコンバーターで、MIDI音符入力をゲ
 ```mermaid
 graph TD
     A[MIDI音源デバイス<br/>🎹 キーボード/コントローラー] 
-    B[MIDI Unit for GROVE<br/>📡 necobit]
+    B[Unit MIDI]
     C[M5Stackデバイス<br/>🖥️ Basic/Core2/CoreS3]
     D1[ターゲットデバイス<br/>💻 PC/Mac/iPad]
     D2[ターゲットデバイス<br/>📱 スマートフォン/タブレット]
@@ -97,7 +98,7 @@ pio run -t upload -e M5Stack-CoreS3-USB-GAMEPAD
 
 ### 基本操作
 
-1. **ハードウェアセットアップ**: MIDI Unit for GROVEをM5Stackの内蔵GROVEポートに接続
+1. **ハードウェアセットアップ**: Unit MIDI をM5Stackの内蔵GROVEポートに接続
 2. **電源オン**: M5Stackが視覚的なキーボードインターフェースを表示
 3. **MIDI入力**: MIDI音源を適切なGPIOピンに接続:
    - M5Stack Basic: RX=22, TX=21

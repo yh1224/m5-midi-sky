@@ -19,7 +19,8 @@ M5Stack-based MIDI to GamePad converter that translates MIDI note inputs into ga
 ## Hardware Requirements
 
 - M5Stack device (Basic, Core2, or CoreS3)
-- MIDI Unit for GROVE by necobit (https://necobit.booth.pm/items/5806265)
+- [Unit MIDI](https://docs.m5stack.com/en/unit/Unit-MIDI)
+  - or MIDI Unit for GROVE by necobit (https://necobit.booth.pm/items/5806265)
 - For USB modes: M5Stack CoreS3 only
 
 ## Connection Diagram
@@ -27,7 +28,7 @@ M5Stack-based MIDI to GamePad converter that translates MIDI note inputs into ga
 ```mermaid
 graph TD
     A[MIDI Source Device<br/>🎹 Keyboard/Controller] 
-    B[MIDI Unit for GROVE<br/>📡 necobit]
+    B[Unit MIDI]
     C[M5Stack Device<br/>🖥️ Basic/Core2/CoreS3]
     D1[Target Device<br/>💻 PC/Mac/iPad]
     D2[Target Device<br/>📱 Smartphone/Tablet]
@@ -97,7 +98,7 @@ pio run -t upload -e M5Stack-CoreS3-USB-GAMEPAD
 
 ### Basic Operation
 
-1. **Hardware Setup**: Connect MIDI Unit for GROVE to M5Stack's built-in GROVE port
+1. **Hardware Setup**: Connect Unit MIDI to M5Stack's built-in GROVE port
 2. **Power On**: The M5Stack will display a visual keyboard interface
 3. **MIDI Input**: Connect MIDI source to the appropriate GPIO pins:
    - M5Stack Basic: RX=22, TX=21
