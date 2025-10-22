@@ -200,15 +200,14 @@ const char* getKey(const int transpose)
 
 void drawKeyboard(const int startY, const int width, const int height, const int transpose)
 {
-    const int whiteKeyHeight = height * 3 / 5;
-    const int blackKeyHeight = height * 2 / 5;
+    const int blackKeyHeight = height * 3 / 5;
 
     // White keys (C3-C5)
     const int whiteKeyNotes[] = {
         36, 38, 40, 41, 43, 45, 47, 48, 50, 52, 53, 55, 57, 59,
         60, 62, 64, 65, 67, 69, 71, 72, 74, 76, 77, 79, 81, 83, 84,
     };
-    constexpr int numWhiteKeys = sizeof(whiteKeyNotes) / sizeof(whiteKeyNotes[0]);
+    constexpr int numWhiteKeys = std::size(whiteKeyNotes);
 
     // Black keys (C#3-A#5)
     const int blackKeyNotes[] = {
@@ -220,7 +219,7 @@ void drawKeyboard(const int startY, const int width, const int height, const int
         0, 1, 3, 4, 5, 7, 8, 10, 11, 12,
         14, 15, 17, 18, 19, 21, 22, 24, 25, 26,
     };
-    constexpr int numBlackKeys = sizeof(blackKeyNotes) / sizeof(blackKeyNotes[0]);
+    constexpr int numBlackKeys = std::size(blackKeyNotes);
 
     // Valid keys (C3 to C5)
     const int validKeyNotes[] = {
@@ -239,8 +238,8 @@ void drawKeyboard(const int startY, const int width, const int height, const int
         const int note = whiteKeyNotes[i];
         const int x = i * whiteKeyWidth;
         uint16_t color = activeNotes[note] ? TFT_CYAN : TFT_WHITE;
-        M5.Display.fillRect(x, startY, whiteKeyWidth - 1, whiteKeyHeight, color);
-        M5.Display.drawRect(x, startY, whiteKeyWidth - 1, whiteKeyHeight, TFT_BLACK);
+        M5.Display.fillRect(x, startY, whiteKeyWidth - 1, height, color);
+        M5.Display.drawRect(x, startY, whiteKeyWidth - 1, height, TFT_BLACK);
     }
     for (int i = 0; i < numBlackKeys; i++) {
         const int pos = blackKeyPositions[i];

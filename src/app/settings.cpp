@@ -105,5 +105,5 @@ void drawSettings(const Settings& settings)
     M5.Display.setTextColor(settingType == SettingType::SUSTAIN ? TFT_YELLOW : TFT_WHITE, TFT_BLACK);
     M5.Display.printf("Sustain: %s\n", settings.getSustain() ? "ON" : "OFF");
 
-    drawKeyboard(128, 320, 100, settings.getTranspose());
+    drawKeyboard(128, 320, 60, settings.getTranspose());
 }
