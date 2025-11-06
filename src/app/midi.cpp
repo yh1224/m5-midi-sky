@@ -125,11 +125,11 @@ void setSustainEnabled(const bool enabled)
     }
 }
 
-Notes15 getNotes15(const int transpose)
+Notes15 getNotes15(const int baseNote, const bool extend)
 {
-    // 15 pitches from C3 to C5 (48-72)
+    // 15 pitches
     const static int noteMapping[15] = {
-        48, 50, 52, 53, 55, 57, 59, 60, 62, 64, 65, 67, 69, 71, 72,
+        0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19, 21, 23, 24,
     };
 
     // Initialize output array to 0 (not pressed)
@@ -151,17 +151,20 @@ Notes15 getNotes15(const int transpose)
         }
 
         // Apply transpose
-        const int transposedNote = midiNote + transpose;
-        if (transposedNote < 0 || transposedNote >= MAX_NOTES) {
-            continue;
-        }
+        int targetNote = midiNote - baseNote;
 
-        // Map all notes to 48-72 range (C3-C5)
-        int targetNote = transposedNote;
-        if (transposedNote < 48) {
-            targetNote += ((4 - transposedNote / 12) * 12); // Add 12, 24, 36, or 48
-        } else if (transposedNote > 72) {
-            targetNote -= (((transposedNote - 61) / 12) * 12); // Subtract 12, 24, 36, or 48
+        // Extend
+        if (extend) {
+            // map all notes
+            while (targetNote < 0) {
+                targetNote += 12;
+            }
+            while (targetNote > 24) {
+                targetNote -= 12;
+            }
+        } else if (targetNote < 0 || targetNote > 24) {
+            // ignore outside
+            continue;
         }
 
         // Find corresponding index in 15-pitch array
@@ -179,59 +182,41 @@ Notes15 getNotes15(const int transpose)
     return Notes15(timestamps);
 }
 
-const char* getKey(const int transpose)
-{
-    const char* KEYS[] = {
-        "C/Am",
-        "Db/Bbm",
-        "D/Bm",
-        "Eb/Cm",
-        "E/C#m",
-        "F/Dm",
-        "F#/D#m",
-        "G/Em",
-        "Ab/Fm",
-        "A/F#m",
-        "Bb/Gm",
-        "B/G#m",
-    };
-    return KEYS[(-transpose + 24) % 12];
-}
-
-void drawKeyboard(const int startY, const int width, const int height, const int transpose)
+void drawKeyboard(const int startY, const int width, const int height, const int baseNote)
 {
     const int blackKeyHeight = height * 3 / 5;
 
-    // White keys (C3-C5)
+    // White keys
     const int whiteKeyNotes[] = {
-        36, 38, 40, 41, 43, 45, 47, 48, 50, 52, 53, 55, 57, 59,
-        60, 62, 64, 65, 67, 69, 71, 72, 74, 76, 77, 79, 81, 83, 84,
+        0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19, 21, 23, 24, 26, 28, 29, 31, 33, 35,
     };
     constexpr int numWhiteKeys = std::size(whiteKeyNotes);
 
-    // Black keys (C#3-A#5)
+    // Black keys
     const int blackKeyNotes[] = {
-        37, 39, 42, 44, 46, 49, 51, 54, 56, 58,
-        61, 63, 66, 68, 70, 73, 75, 78, 80, 82,
+        1, 3, 6, 8, 10, 13, 15, 18, 20, 22, 25, 27, 30, 32, 34,
     };
     // Black key positions relative to white keys
     const int blackKeyPositions[] = {
-        0, 1, 3, 4, 5, 7, 8, 10, 11, 12,
-        14, 15, 17, 18, 19, 21, 22, 24, 25, 26,
+        0, 1, 3, 4, 5, 7, 8, 10, 11, 12, 14, 15, 17, 18, 19, 21,
     };
     constexpr int numBlackKeys = std::size(blackKeyNotes);
 
     // Valid keys (C3 to C5)
     const int validKeyNotes[] = {
-        48, 50, 52, 53, 55, 57, 59, 60, 62, 64, 65, 67, 69, 71, 72,
+        0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19, 21, 23, 24,
     };
 
     const int whiteKeyWidth = width / numWhiteKeys;
     const int blackKeyWidth = whiteKeyWidth * 2 / 3;
 
-    bool activeNotes[MAX_NOTES] = {false};
+    int base = baseNote;
+    while (base >= 12) {
+        base -= 12;
+    }
+    bool activeNotes[36] = {false};
     for (const int validKeyNote : validKeyNotes) {
-        activeNotes[validKeyNote - transpose] = true;
+        activeNotes[base + validKeyNote] = true;
     }
 
     for (int i = 0; i < numWhiteKeys; i++) {

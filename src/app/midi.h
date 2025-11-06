@@ -7,10 +7,8 @@ void setupMIDI(int8_t rxPin, int8_t txPin);
 
 void setSustainEnabled(bool enabled);
 
-Notes15 getNotes15(int transpose);
+Notes15 getNotes15(int baseNote, bool extend);
 
-const char* getKey(int transpose);
-
-void drawKeyboard(int startY, int width, int height, int transpose);
+void drawKeyboard(int startY, int width, int height, int baseNote);
 
 #endif // !defined(APP_MIDI_H)

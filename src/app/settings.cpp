@@ -8,15 +8,15 @@
 constexpr int MAPPING_MIN = 1;
 constexpr int MAPPING_MAX = 2;
 constexpr int MAPPING_DEFAULT = 1;
-constexpr int TRANSPOSE_MIN = -12;
-constexpr int TRANSPOSE_MAX = 12;
-constexpr int TRANSPOSE_DEFAULT = 0;
+constexpr int BASENOTE_MIN = 24; // C1
+constexpr int BASENOTE_MAX = 84; // C6
+constexpr int BASENOTE_DEFAULT = 48; // C3
 constexpr bool SUSTAIN_DEFAULT = false;
 
 Settings::Settings()
     : _settingType(SettingType::NONE),
       _mapping(MAPPING_DEFAULT),
-      _transpose(TRANSPOSE_DEFAULT),
+      _baseNote(BASENOTE_DEFAULT),
       _sustain(SUSTAIN_DEFAULT)
 {
 }
@@ -25,7 +25,7 @@ bool Settings::operator==(const Settings& other) const
 {
     return _settingType == other._settingType &&
         _mapping == other._mapping &&
-        _transpose == other._transpose &&
+        _baseNote == other._baseNote &&
         _sustain == other._sustain;
 }
 
@@ -63,13 +63,13 @@ bool Settings::processButtons(const bool btnPressedA, const bool btnPressedB, co
             }
             changed = true;
             break;
-        case SettingType::TRANSPOSE:
+        case SettingType::BASENOTE:
             M5.Speaker.tone(2000, 100);
-            if (btnPressedA && _transpose > TRANSPOSE_MIN) {
-                _transpose--;
+            if (btnPressedA && _baseNote > BASENOTE_MIN) {
+                _baseNote--;
             }
-            if (btnPressedC && _transpose < TRANSPOSE_MAX) {
-                _transpose++;
+            if (btnPressedC && _baseNote < BASENOTE_MAX) {
+                _baseNote++;
             }
             changed = true;
             break;
@@ -89,6 +89,44 @@ bool Settings::processButtons(const bool btnPressedA, const bool btnPressedB, co
     return changed;
 }
 
+static const char* getBaseNote(const int baseNote)
+{
+    const char* KEYS[] = {
+        "C",
+        "C#",
+        "D",
+        "D#",
+        "E",
+        "F",
+        "F#",
+        "G",
+        "G#",
+        "A",
+        "A#",
+        "B",
+    };
+    return KEYS[baseNote % 12];
+}
+
+static const char* getKey(const int baseNote)
+{
+    const char* KEYS[] = {
+        "C/Am",
+        "Db/Bbm",
+        "D/Bm",
+        "Eb/Cm",
+        "E/C#m",
+        "F/Dm",
+        "F#/D#m",
+        "G/Em",
+        "Ab/Fm",
+        "A/F#m",
+        "Bb/Gm",
+        "B/G#m",
+    };
+    return KEYS[baseNote % 12];
+}
+
 void drawSettings(const Settings& settings)
 {
     const auto settingType = settings.getSettingType();
@@ -99,11 +137,12 @@ void drawSettings(const Settings& settings)
     M5.Display.setTextColor(settingType == SettingType::MAPPING ? TFT_YELLOW : TFT_WHITE, TFT_BLACK);
     M5.Display.printf("Mapping: %d\n", settings.getMapping());
 
-    M5.Display.setTextColor(settingType == SettingType::TRANSPOSE ? TFT_YELLOW : TFT_WHITE, TFT_BLACK);
-    M5.Display.printf("Transpose: %+d (%s)\n", settings.getTranspose(), getKey(settings.getTranspose()));
+    M5.Display.setTextColor(settingType == SettingType::BASENOTE ? TFT_YELLOW : TFT_WHITE, TFT_BLACK);
+    M5.Display.printf("Base note: %s%d (%s)\n", getBaseNote(settings.getBaseNote()),
+                      settings.getBaseNote() / 12 - 1, getKey(settings.getBaseNote()));
 
     M5.Display.setTextColor(settingType == SettingType::SUSTAIN ? TFT_YELLOW : TFT_WHITE, TFT_BLACK);
     M5.Display.printf("Sustain: %s\n", settings.getSustain() ? "ON" : "OFF");
 
-    drawKeyboard(128, 320, 60, settings.getTranspose());
+    drawKeyboard(128, 320, 60, settings.getBaseNote());
 }

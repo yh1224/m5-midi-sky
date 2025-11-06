@@ -5,7 +5,7 @@ enum class SettingType
 {
     NONE = 0,
     MAPPING = 1,
-    TRANSPOSE = 2,
+    BASENOTE = 2,
     SUSTAIN = 3,
     COUNT = 4,
 };
@@ -18,7 +18,7 @@ public:
     SettingType getSettingType() const { return _settingType; }
     bool isSettingsMode() const { return _settingType != SettingType::NONE; }
     int getMapping() const { return _mapping; }
-    int getTranspose() const { return _transpose; }
+    int getBaseNote() const { return _baseNote; }
     bool getSustain() const { return _sustain; }
 
     bool processButtons(bool btnPressedA, bool btnPressedB, bool btnPressedC);
@@ -29,7 +29,7 @@ public:
 private:
     SettingType _settingType;
     int _mapping;
-    int _transpose;
+    int _baseNote;
     bool _sustain;
 };
 
