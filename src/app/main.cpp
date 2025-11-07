@@ -98,7 +98,7 @@ void loop()
     testTimestamps[testIndex] = ts;
     const Notes15 notes15{testTimestamps};
 #else
-    const Notes15 notes15 = getNotes15(settings.getBaseNote(), false);
+    const Notes15 notes15 = getNotes15(settings.getBaseNote(), settings.getExpand());
 #endif
     // Update controller if there are changes
     if (firstDraw || notes15 != prevNotes15) {

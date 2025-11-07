@@ -11,12 +11,14 @@ constexpr int MAPPING_DEFAULT = 1;
 constexpr int BASENOTE_MIN = 24; // C1
 constexpr int BASENOTE_MAX = 84; // C6
 constexpr int BASENOTE_DEFAULT = 48; // C3
+constexpr bool EXPAND_DEFAULT = false;
 constexpr bool SUSTAIN_DEFAULT = false;
 
 Settings::Settings()
     : _settingType(SettingType::NONE),
       _mapping(MAPPING_DEFAULT),
       _baseNote(BASENOTE_DEFAULT),
+      _expand(EXPAND_DEFAULT),
       _sustain(SUSTAIN_DEFAULT)
 {
 }
@@ -70,6 +72,14 @@ bool Settings::processButtons(const bool btnPressedA, const bool btnPressedB, co
             }
             if (btnPressedC && _baseNote < BASENOTE_MAX) {
                 _baseNote++;
+            }
+            changed = true;
+            break;
+        case SettingType::EXPAND:
+            M5.Speaker.tone(2000, 100);
+            if (btnPressedA || btnPressedC) {
+                _expand = !_expand;
+                setSustainEnabled(_expand);
             }
             changed = true;
             break;
@@ -140,6 +150,9 @@ void drawSettings(const Settings& settings)
     M5.Display.setTextColor(settingType == SettingType::BASENOTE ? TFT_YELLOW : TFT_WHITE, TFT_BLACK);
     M5.Display.printf("Base note: %s%d (%s)\n", getBaseNote(settings.getBaseNote()),
                       settings.getBaseNote() / 12 - 1, getKey(settings.getBaseNote()));
+
+    M5.Display.setTextColor(settingType == SettingType::EXPAND ? TFT_YELLOW : TFT_WHITE, TFT_BLACK);
+    M5.Display.printf("Expand: %s\n", settings.getExpand() ? "ON" : "OFF");
 
     M5.Display.setTextColor(settingType == SettingType::SUSTAIN ? TFT_YELLOW : TFT_WHITE, TFT_BLACK);
     M5.Display.printf("Sustain: %s\n", settings.getSustain() ? "ON" : "OFF");

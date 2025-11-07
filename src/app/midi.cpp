@@ -125,7 +125,7 @@ void setSustainEnabled(const bool enabled)
     }
 }
 
-Notes15 getNotes15(const int baseNote, const bool extend)
+Notes15 getNotes15(const int baseNote, const bool expand)
 {
     // 15 pitches
     const static int noteMapping[15] = {
@@ -153,8 +153,8 @@ Notes15 getNotes15(const int baseNote, const bool extend)
         // Apply transpose
         int targetNote = midiNote - baseNote;
 
-        // Extend
-        if (extend) {
+        // Expand
+        if (expand) {
             // map all notes
             while (targetNote < 0) {
                 targetNote += 12;
