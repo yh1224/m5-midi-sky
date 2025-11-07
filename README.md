@@ -11,10 +11,11 @@ M5Stack-based MIDI to GamePad converter that translates MIDI note inputs into ga
 
 - **Multiple Controller Types**: Bluetooth gamepad, USB gamepad, Nintendo Switch Pro Controller, USB keyboard
 - **M5Stack Support**: Compatible with M5Stack Basic, Core2, and CoreS3
-- **MIDI Note Mapping**: Maps MIDI notes C3-C5 (48-72) to controller inputs
+- **MIDI Note Mapping**: Maps MIDI notes to controller inputs
 - **Settings Menu System**: Navigate settings with Button B, adjust values with Buttons A/C
 - **Dual Mapping System**: Two different button/control mappings
-- **Transpose Assist**: Shift note range up/down by semitones, allowing you to play sheet music in different keys directly
+- **Base Note Configuration (Transpose assist)**: Set the base note for your MIDI input, allowing you to play sheet music in different keys directly
+- **Expand Mode**: Enable or disable notes outside the range
 
 ## Hardware Requirements
 
@@ -49,6 +50,7 @@ graph TD
 ```
 
 ### Connection Details
+
 - Connect MIDI source (keyboard, controller, etc.) to MIDI Unit for GROVE via standard MIDI cable
 - Connect MIDI Unit for GROVE to M5Stack's built-in GROVE port using GROVE cable
 - For USB modes: Connect M5Stack CoreS3 to target device via USB cable
@@ -66,11 +68,13 @@ graph TD
 ## Build Environments
 
 ### Bluetooth Environments
+
 - `M5Stack-BASIC-BT-GAMEPAD` - M5Stack Basic with Bluetooth gamepad
 - `M5Stack-Core2-BT-GAMEPAD` - M5Stack Core2 with Bluetooth gamepad  
 - `M5Stack-CoreS3-BT-GAMEPAD` - M5Stack CoreS3 with Bluetooth gamepad
 
 ### USB Environments (CoreS3 only)
+
 - `M5Stack-CoreS3-USB-GAMEPAD` - M5Stack CoreS3 with USB gamepad
 - `M5Stack-CoreS3-USB-NSWITCH` - M5Stack CoreS3 with Nintendo Switch controller
 - `M5Stack-CoreS3-USB-KEYBOARD` - M5Stack CoreS3 with USB keyboard
@@ -111,40 +115,47 @@ pio run -t upload -e M5Stack-CoreS3-USB-GAMEPAD
 ### Controls
 
 - **Button A**: Decrease current setting value (when a setting is selected)
-- **Button B**: Cycle through settings (None → Mapping → Transpose → None...)
+- **Button B**: Cycle through settings (None → Mapping → Base Note → Expand → None...)
 - **Button C**: Increase current setting value (when a setting is selected)
 
 #### Settings Menu
+
 - **None**: Initial state - A/C buttons are disabled, press B to select a setting
-- **Mapping**: Switch between mapping modes (1-2) using A/C buttons  
-- **Transpose**: Adjust transpose value (-12 to +12 semitones) using A/C buttons
+- **Mapping**: Switch between mapping modes (1-2) using A/C buttons
+- **Base Note**: Set the base note - adjustable from C to B in semitones using A/C buttons
+- **Expand**: Toggle expand mode (ON/OFF) using A/C buttons - when enabled, notes outside the standard range are active
 
 ### MIDI Note Mapping
 
 The system maps 15 specific MIDI notes to controller inputs:
-- **Note Range**: C3 to C5 (MIDI notes 48, 50, 52, 53, 55, 57, 59, 60, 62, 64, 65, 67, 69, 71, 72)
-- **Mapping**: Each controller type has its own mapping table that converts these 15 positions to specific outputs
-- **Transpose**: Use Button A/C to shift the entire range up/down by semitones (when Transpose setting is selected)
 
+- **Note Range**: default from C3 to C5 (48, 50, 52, 53, 55, 57, 59, 60, 62, 64, 65, 67, 69, 71, 72)
+- **Mapping**: Each controller type has its own mapping table that converts these 15 positions to specific outputs
+- **Base Note**: Set the base note to shift the entire range
+- **Expand Mode**: When enabled, notes outside the standard range remain active
 
 ## Controller Compatibility
 
 ### Bluetooth Gamepad
+
 - Emulates Xbox One S controller
 - **Tested devices**: macOS 15: Apple MacBook Pro (M1), Windows 11: Microsoft Surface Pro 7, iOS 18: Apple iPad (10th gen.)
 - **Not working**: Android 16: Google Pixel 7a
 
 ### USB Gamepad
+
 - Emulates Logitech F310 controller
 - **Tested devices**: macOS 15: Apple MacBook Pro (M1), Windows 11: Microsoft Surface Pro 7, iOS 18: Apple iPad (10th gen.)
 - **Not working**: Android 16: Google Pixel 7a
 
 ### USB Keyboard
+
 - Emulates Logitech Unifying keyboard
 - **Tested devices**: macOS 15: Apple MacBook Pro (M1), Windows 11: Microsoft Surface Pro 7, Android 16: Google Pixel 7a
 - **Not working**: iOS 18: Apple iPad (10th gen.)
 
 ### Nintendo Switch Controller
+
 - Emulates Nintendo Switch Pro Controller
 - **Tested devices**: Nintendo Switch: HAC-001
 
@@ -160,10 +171,10 @@ The system maps 15 specific MIDI notes to controller inputs:
 > [!NOTE]
 > Code contributions to improve compatibility with additional devices and platforms are welcome!
 
-
 ## Acknowledgments
 
 This project was inspired by and references the following works by おにぎり ([@onigiri-uma2](https://github.com/onigiri-uma2)):
+
 - [Midi2XInput](https://github.com/onigiri-uma2/Midi2XInput)
 - [Midi2Switch](https://github.com/onigiri-uma2/Midi2Switch)
 
@@ -172,6 +183,7 @@ Special thanks for the valuable insights and implementations that helped make th
 ## Trademarks
 
 The following trademarks and registered trademarks are the property of their respective owners:
+
 - M5Stack® is a trademark of M5Stack Technology Co., Ltd.
 - Nintendo Switch® is a trademark of Nintendo Co., Ltd.
 - Xbox® is a trademark of Microsoft Corporation

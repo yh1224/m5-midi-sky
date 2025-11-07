@@ -11,10 +11,11 @@ M5StackベースのMIDI to GamePadコンバーターで、MIDI音符入力をゲ
 
 - **複数のコントローラータイプ**: Bluetoothゲームパッド、USBゲームパッド、Nintendo Switch Pro Controller、USBキーボード
 - **M5Stackサポート**: M5Stack Basic、Core2、CoreS3に対応
-- **MIDI音符マッピング**: MIDI音符C3-C5 (48-72)をコントローラー入力にマッピング
+- **MIDI音符マッピング**: MIDI音符をコントローラー入力にマッピング
 - **設定メニューシステム**: Button Bで設定をナビゲート、Button A/Cで値を調整
 - **マッピング切り替え**: 2つの異なるボタン/制御マッピング
-- **トランスポーズアシスト**: 音符の範囲を半音階単位でずらし、異なるキーの楽譜を直接演奏可能
+- **基準音設定 (トランスポーズアシスト)**: MIDI入力の基準音を設定でき、異なるキーの楽譜を直接演奏可能
+- **拡張モード**: 範囲外の鍵盤を有効にするか無効にするかを設定可能
 
 ## ハードウェア要件
 
@@ -49,6 +50,7 @@ graph TD
 ```
 
 ### 接続詳細
+
 - MIDI音源（キーボード、コントローラーなど）を標準MIDIケーブルでMIDI Unit for GROVEに接続
 - MIDI Unit for GROVEをGROVEケーブルでM5Stackの内蔵GROVEポートに接続
 - USBモード用: M5Stack CoreS3をUSBケーブルでターゲットデバイスに接続
@@ -66,11 +68,13 @@ graph TD
 ## ビルド環境
 
 ### Bluetooth環境
+
 - `M5Stack-BASIC-BT-GAMEPAD` - M5Stack BasicでBluetoothゲームパッド
 - `M5Stack-Core2-BT-GAMEPAD` - M5Stack Core2でBluetoothゲームパッド  
 - `M5Stack-CoreS3-BT-GAMEPAD` - M5Stack CoreS3でBluetoothゲームパッド
 
 ### USB環境（CoreS3のみ）
+
 - `M5Stack-CoreS3-USB-GAMEPAD` - M5Stack CoreS3でUSBゲームパッド
 - `M5Stack-CoreS3-USB-NSWITCH` - M5Stack CoreS3でNintendo Switchコントローラー
 - `M5Stack-CoreS3-USB-KEYBOARD` - M5Stack CoreS3でUSBキーボード
@@ -104,46 +108,54 @@ pio run -t upload -e M5Stack-CoreS3-USB-GAMEPAD
    - M5Stack Basic: RX=22, TX=21
    - M5Stack Core2: RX=33, TX=32  
    - M5Stack CoreS3: RX=1, TX=2
-4. **コントローラー出力**: 
+4. **コントローラー出力**:
    - Bluetoothモード: ターゲットデバイスとペアリング
    - USBモード: M5Stack CoreS3をUSBケーブルで接続
 
 ### コントロール
 
 - **Button A**: 現在の設定値を減少（設定が選択されている時）
-- **Button B**: 設定項目を循環（なし → マッピング → 移調 → なし...）
+- **Button B**: 設定項目を循環（なし → マッピング → 基準音 → 拡張 → なし...）
 - **Button C**: 現在の設定値を増加（設定が選択されている時）
 
 #### 設定メニュー
+
 - **なし**: 初期状態 - A/Cボタンは無効、Bボタンを押して設定を選択
 - **マッピング**: A/Cボタンでマッピングモード（1-2）を切り替え
-- **移調**: A/Cボタンで移調値（-12から+12半音）を調整
+- **基準音**: 基準音を設定 - A/Cボタンで半音単位で設定
+- **拡張モード**: A/Cボタンで拡張モード（ON/OFF）を切り替え - ONの場合、範囲外の鍵盤も有効になります
 
 ### MIDI音符マッピング
 
 システムは15の特定のMIDI音符をコントローラー入力にマッピングします:
-- **音符範囲**: C3からC5（MIDI音符48, 50, 52, 53, 55, 57, 59, 60, 62, 64, 65, 67, 69, 71, 72）
+
+- **音符範囲**: 標準はC3からC5（48, 50, 52, 53, 55, 57, 59, 60, 62, 64, 65, 67, 69, 71, 72）
 - **マッピング**: 各コントローラータイプには、これら15の位置を特定の出力に変換する独自のマッピングテーブルがあります
-- **移調**: Button A/Cを使用して、全体の範囲を半音階単位で上下にシフト（移調設定が選択されている時）
+- **基準音**: 基準音を設定して鍵盤の範囲をシフト
+- **拡張モード**: ONの場合、範囲外の鍵盤も有効になります
 
 ## コントローラー互換性
 
 ### Bluetoothゲームパッド
+
 - Xbox One Sコントローラーをエミュレート
 - **テスト済みデバイス**: macOS 15: Apple MacBook Pro (M1)、Windows 11: Microsoft Surface Pro 7、iOS 18: Apple iPad (10th gen.)
 - **動作しない**: Android 16: Google Pixel 7a
 
 ### USBゲームパッド
+
 - Logitech F310コントローラーをエミュレート
 - **テスト済みデバイス**: macOS 15: Apple MacBook Pro (M1)、Windows 11: Microsoft Surface Pro 7、iOS 18: Apple iPad (10th gen.)
 - **動作しない**: Android 16: Google Pixel 7a
 
 ### USBキーボード
+
 - Logitech Unifyingキーボードをエミュレート
 - **テスト済みデバイス**: macOS 15: Apple MacBook Pro (M1)、Windows 11: Microsoft Surface Pro 7、Android 16: Google Pixel 7a
 - **動作しない**: iOS 18: Apple iPad (10th gen.)
 
 ### Nintendo Switchコントローラー
+
 - Nintendo Switch Pro Controllerをエミュレート
 - **テスト済みデバイス**: Nintendo Switch: HAC-001
 
@@ -162,6 +174,7 @@ pio run -t upload -e M5Stack-CoreS3-USB-GAMEPAD
 ## 謝辞
 
 このプロジェクトは、おにぎり([@onigiri-uma2](https://github.com/onigiri-uma2))さんによる以下の作品にインスパイアされ、参考にさせていただきました:
+
 - [Midi2XInput](https://github.com/onigiri-uma2/Midi2XInput)
 - [Midi2Switch](https://github.com/onigiri-uma2/Midi2Switch)
 
@@ -170,6 +183,7 @@ pio run -t upload -e M5Stack-CoreS3-USB-GAMEPAD
 ## 商標
 
 以下の商標および登録商標は、それぞれの所有者の財産です:
+
 - M5Stack®は、M5Stack Technology Co., Ltd.の商標です。
 - Nintendo Switch®は、任天堂株式会社の商標です。
 - Xbox®は、Microsoft Corporationの商標です
