@@ -9,6 +9,4 @@ void setSustainEnabled(bool enabled);
 
 Notes getNotes(int baseNote, bool expand);
 
-void drawKeyboard(int startY, int width, int height, int baseNote);
-
 #endif // !defined(APP_MIDI_H)

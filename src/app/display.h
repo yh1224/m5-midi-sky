@@ -9,4 +9,6 @@ void drawNotes(const Notes& notes, int startY, int width, int height, int spacin
 
 void drawButtons(int startY, int width, int height, bool buttonA, bool buttonC);
 
+void drawKeyboard(int startY, int width, int height, int baseNote);
+
 #endif // !defined(APP_DISPLAY_H)

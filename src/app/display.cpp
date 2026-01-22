@@ -88,3 +88,57 @@ void drawButtons(const int startY, const int width, const int height, const bool
         );
     }
 }
+
+void drawKeyboard(const int startY, const int width, const int height, const int baseNote)
+{
+    const int blackKeyHeight = height * 3 / 5;
+
+    // White keys
+    const int whiteKeyNotes[] = {
+        0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19, 21, 23, 24, 26, 28, 29, 31, 33, 35,
+    };
+    constexpr int numWhiteKeys = std::size(whiteKeyNotes);
+
+    // Black keys
+    const int blackKeyNotes[] = {
+        1, 3, 6, 8, 10, 13, 15, 18, 20, 22, 25, 27, 30, 32, 34,
+    };
+    // Black key positions relative to white keys
+    const int blackKeyPositions[] = {
+        0, 1, 3, 4, 5, 7, 8, 10, 11, 12, 14, 15, 17, 18, 19, 21,
+    };
+    constexpr int numBlackKeys = std::size(blackKeyNotes);
+
+    // Valid keys (C3 to C5)
+    const int validKeyNotes[] = {
+        0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19, 21, 23, 24,
+    };
+
+    const int whiteKeyWidth = width / numWhiteKeys;
+    const int blackKeyWidth = whiteKeyWidth * 2 / 3;
+
+    int base = baseNote;
+    while (base >= 12) {
+        base -= 12;
+    }
+    bool activeNotes[36] = {false};
+    for (const int validKeyNote : validKeyNotes) {
+        activeNotes[base + validKeyNote] = true;
+    }
+
+    for (int i = 0; i < numWhiteKeys; i++) {
+        const int note = whiteKeyNotes[i];
+        const int x = i * whiteKeyWidth;
+        uint16_t color = activeNotes[note] ? TFT_CYAN : TFT_WHITE;
+        M5.Display.fillRect(x, startY, whiteKeyWidth - 1, height, color);
+        M5.Display.drawRect(x, startY, whiteKeyWidth - 1, height, TFT_BLACK);
+    }
+    for (int i = 0; i < numBlackKeys; i++) {
+        const int pos = blackKeyPositions[i];
+        const int note = blackKeyNotes[i];
+        const int x = pos * whiteKeyWidth + whiteKeyWidth - blackKeyWidth / 2;
+        uint16_t color = activeNotes[note] ? TFT_CYAN : TFT_BLACK;
+        M5.Display.fillRect(x, startY, blackKeyWidth, blackKeyHeight, color);
+        M5.Display.drawRect(x, startY, blackKeyWidth, blackKeyHeight, TFT_BLACK);
+    }
+}
