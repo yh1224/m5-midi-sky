@@ -6,7 +6,7 @@
 void test_notes_constructor()
 {
     unsigned long timestamps[15] = {1, 2, 3, 4, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-    const Notes notes(timestamps);
+    const Notes notes{15, timestamps};
 
     TEST_ASSERT_EQUAL(1, notes.get(0));
     TEST_ASSERT_EQUAL(2, notes.get(1));
@@ -17,7 +17,7 @@ void test_notes_constructor()
 void test_notes_get_bounds()
 {
     unsigned long timestamps[15] = {0};
-    const Notes notes(timestamps);
+    const Notes notes{15, timestamps};
 
     TEST_ASSERT_EQUAL(0, notes.get(-1));
     TEST_ASSERT_EQUAL(0, notes.get(15));
@@ -30,9 +30,9 @@ void test_notes_inequality()
     unsigned long timestamps2[15] = {1, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     unsigned long timestamps3[15] = {1, 2, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
-    const Notes notes1(timestamps1);
-    const Notes notes2(timestamps2);
-    const Notes notes3(timestamps3);
+    const Notes notes1{15, timestamps1};
+    const Notes notes2{15, timestamps2};
+    const Notes notes3{15, timestamps3};
 
     TEST_ASSERT_FALSE(notes1 != notes2);
     TEST_ASSERT_TRUE(notes1 != notes3);
@@ -41,7 +41,7 @@ void test_notes_inequality()
 void test_notes_filter()
 {
     unsigned long timestamps[15] = {7, 6, 5, 4, 3, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0};
-    const Notes notes(timestamps);
+    const Notes notes{15, timestamps};
     NotesFilter filter;
 
     const Notes result = filter.latest(notes, 3);

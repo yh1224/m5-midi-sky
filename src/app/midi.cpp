@@ -4,7 +4,7 @@
 #include "app/midi.h"
 
 // Total number of MIDI notes (0-127)
-static constexpr int MAX_NOTES = 128;
+static constexpr int MAX_MIDI_NOTES = 128;
 
 // Duration to temporarily turn off key during repress
 static constexpr unsigned long REPRESS_KEY_OFF_DURATION_MS = 50;
@@ -13,13 +13,13 @@ static constexpr unsigned long REPRESS_KEY_OFF_DURATION_MS = 50;
 static bool sustainEnabled = false;
 
 // Key states - timestamp when each note was last pressed (0 = not pressed)
-static unsigned long notes[MAX_NOTES] = {0};
+static unsigned long notes[MAX_MIDI_NOTES] = {0};
 
 // Physical key press state (true = physically pressed)
-static bool physicallyPressed[MAX_NOTES] = {false};
+static bool physicallyPressed[MAX_MIDI_NOTES] = {false};
 
 // Timestamps for repressed keys (milliseconds)
-static unsigned long repressedTime[MAX_NOTES] = {};
+static unsigned long repressedTime[MAX_MIDI_NOTES] = {};
 
 // Sustain pedal state
 static bool sustainPedal = false;
@@ -35,7 +35,7 @@ MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, MIDI);
             case midi::NoteOn:
                 {
                     const int noteNum = MIDI.getData1();
-                    if (0 <= noteNum && noteNum < MAX_NOTES) {
+                    if (0 <= noteNum && noteNum < MAX_MIDI_NOTES) {
                         physicallyPressed[noteNum] = true;
                         notes[noteNum] = millis();
                         if (sustainEnabled && sustainPedal && notes[noteNum] != 0) {
@@ -50,7 +50,7 @@ MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, MIDI);
             case midi::NoteOff:
                 {
                     const int noteNum = MIDI.getData1();
-                    if (0 <= noteNum && noteNum < MAX_NOTES) {
+                    if (0 <= noteNum && noteNum < MAX_MIDI_NOTES) {
                         physicallyPressed[noteNum] = false;
                         if (sustainEnabled && sustainPedal && notes[noteNum] != 0) {
                             // Keep note sustained while pedal is down
@@ -71,7 +71,7 @@ MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, MIDI);
                         sustainPedal = ccValue >= 64;
                         // If sustain pedal is released, turn off sustained notes except physically pressed ones
                         if (!sustainPedal) {
-                            for (int i = 0; i < MAX_NOTES; i++) {
+                            for (int i = 0; i < MAX_MIDI_NOTES; i++) {
                                 if (notes[i] != 0 && !physicallyPressed[i]) {
                                     notes[i] = 0;
                                 }
@@ -92,9 +92,9 @@ void setupMIDI(const int8_t rxPin, const int8_t txPin)
 {
     Serial2.begin(31250, SERIAL_8N1, rxPin, txPin);
 
-    memset(notes, 0, sizeof(unsigned long) * MAX_NOTES);
-    memset(physicallyPressed, false, sizeof(bool) * MAX_NOTES);
-    memset(repressedTime, 0, sizeof(unsigned long) * MAX_NOTES);
+    memset(notes, 0, sizeof(unsigned long) * MAX_MIDI_NOTES);
+    memset(physicallyPressed, false, sizeof(bool) * MAX_MIDI_NOTES);
+    memset(repressedTime, 0, sizeof(unsigned long) * MAX_MIDI_NOTES);
     sustainPedal = false;
 
     MIDI.turnThruOn();
@@ -117,7 +117,7 @@ void setSustainEnabled(const bool enabled)
 
     // If sustain is disabled, immediately turn off all sustained notes
     if (!enabled && sustainPedal) {
-        for (int i = 0; i < MAX_NOTES; i++) {
+        for (int i = 0; i < MAX_MIDI_NOTES; i++) {
             if (notes[i] != 0 && !physicallyPressed[i]) {
                 notes[i] = 0;
             }
@@ -125,18 +125,23 @@ void setSustainEnabled(const bool enabled)
     }
 }
 
-Notes getNotes(const int baseNote, const bool expand)
+Notes getNotes(const int numNotes, const int noteMapping[], const int baseNote, const bool expand)
 {
-    // 15 pitches
-    const static int noteMapping[15] = {
-        0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19, 21, 23, 24,
-    };
-
     // Initialize output array to 0 (not pressed)
-    unsigned long timestamps[15] = {0};
+    auto timestamps = std::make_unique<unsigned long[]>(numNotes);
+    for (int i = 0; i < numNotes; i++) {
+        timestamps[i] = 0;
+    }
+
+    int maxNote = 0;
+    for (int i = 0; i < numNotes; i++) {
+        if (maxNote < noteMapping[i]) {
+            maxNote = noteMapping[i];
+        }
+    }
 
     const unsigned long currentTime = millis();
-    for (int midiNote = 0; midiNote < MAX_NOTES; midiNote++) {
+    for (int midiNote = 0; midiNote < MAX_MIDI_NOTES; midiNote++) {
         if (notes[midiNote] == 0) {
             continue;
         }
@@ -157,18 +162,18 @@ Notes getNotes(const int baseNote, const bool expand)
         if (expand) {
             // map all notes
             while (targetNote < 0) {
-                targetNote += 12;
+                targetNote += 12; // +1 octave
             }
-            while (targetNote > 24) {
-                targetNote -= 12;
+            while (targetNote > maxNote) {
+                targetNote -= 12; // -1 octave
             }
-        } else if (targetNote < 0 || targetNote > 24) {
+        } else if (targetNote < 0 || targetNote > maxNote) {
             // ignore outside
             continue;
         }
 
-        // Find corresponding index in 15-pitch array
-        for (int i = 0; i < 15; i++) {
+        // Find corresponding index in pitch array
+        for (int i = 0; i < numNotes; i++) {
             if (noteMapping[i] == targetNote) {
                 // Keep the latest timestamp for each position
                 if (timestamps[i] == 0 || notes[midiNote] > timestamps[i]) {
@@ -179,5 +184,5 @@ Notes getNotes(const int baseNote, const bool expand)
         }
     }
 
-    return Notes(timestamps);
+    return Notes(numNotes, timestamps.get());
 }

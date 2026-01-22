@@ -47,7 +47,7 @@ static USBHIDKeyboard keyboard;
 static NotesFilter noteFilter;
 
 // Previous state
-static Notes prevNotes;
+static Notes prevNotes{15};
 
 static void applyMIDIToUSBKeyboard(const Notes& notes, const int mapping)
 {
