@@ -34,7 +34,7 @@ void loop()
     static bool previousSettingsMode = false;
 
     // Previous notes state
-    static Notes15 prevNotes15;
+    static Notes prevNotes;
 
     // Touch state tracking for one-touch detection
     static bool wasTouchPressed = false;
@@ -96,20 +96,20 @@ void loop()
     }
     unsigned long testTimestamps[15] = {0};
     testTimestamps[testIndex] = ts;
-    const Notes15 notes15{testTimestamps};
+    const Notes notes{testTimestamps};
 #else
-    const Notes15 notes15 = getNotes15(settings.getBaseNote(), settings.getExpand());
+    const Notes notes = getNotes(settings.getBaseNote(), settings.getExpand());
 #endif
     // Update controller if there are changes
-    if (firstDraw || notes15 != prevNotes15) {
-        updateController(notes15, settings.getMapping());
+    if (firstDraw || notes != prevNotes) {
+        updateController(notes, settings.getMapping());
 
         // Display notes when not in settings mode
         if (!settings.isSettingsMode()) {
-            drawNotes(notes15, 32, 320, 160, 16, firstDraw);
+            drawNotes(notes, 32, 320, 160, 16, firstDraw);
         }
 
-        prevNotes15 = notes15;
+        prevNotes = notes;
         firstDraw = false;
     }
 

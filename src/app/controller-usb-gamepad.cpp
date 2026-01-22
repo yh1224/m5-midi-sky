@@ -91,15 +91,15 @@ const MappingEntry* mappings[] = {
 static USBHIDGamepad gamepad;
 
 // Filter to prevent old notes from reappearing
-static Notes15Filter noteFilter;
+static NotesFilter noteFilter;
 
-static void applyMIDIToUSBGamepad(const Notes15& notes15, const int mapping)
+static void applyMIDIToUSBGamepad(const Notes& notes, const int mapping)
 {
     // Get mapping
     const MappingEntry* currentMapping = mappings[mapping - 1];
 
     // Limit to latest notes for gamepad
-    const Notes15 latestNotes15 = noteFilter.latest(notes15, MAX_SIMULTANEOUS_NOTES);
+    const Notes latestNotes = noteFilter.latest(notes, MAX_SIMULTANEOUS_NOTES);
 
     // Variables for accumulating stick input (-127 to 127 range for USB HID)
     int8_t leftThumbX = 0, leftThumbY = 0;
@@ -113,7 +113,7 @@ static void applyMIDIToUSBGamepad(const Notes15& notes15, const int mapping)
 
     // Process 15-pitch array
     for (int i = 0; i < 15; i++) {
-        if (latestNotes15.get(i) != 0) {
+        if (latestNotes.get(i) != 0) {
             const MappingEntry& mappingEntry = currentMapping[i];
             switch (mappingEntry.type) {
             case ACTION_BUTTON:
@@ -191,14 +191,14 @@ static void applyMIDIToUSBGamepad(const Notes15& notes15, const int mapping)
     gamepad.send(leftThumbX, leftThumbY, rightThumbX, rightThumbY, 0, 0, hat, buttons);
 }
 
-void updateController(const Notes15& notes15, const int mapping)
+void updateController(const Notes& notes, const int mapping)
 {
     M5.Display.setCursor(0, 0);
     M5.Display.setTextColor(TFT_GREEN, TFT_BLACK);
     M5.Display.println("USB Gamepad   ");
 
     // MIDI to gamepad processing
-    applyMIDIToUSBGamepad(notes15, mapping);
+    applyMIDIToUSBGamepad(notes, mapping);
 }
 
 void setupController(const char* deviceName, const char* deviceManufacturer)

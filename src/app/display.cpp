@@ -11,7 +11,7 @@ void resetDisplay(const bool settingsMode)
     drawButtons(208, M5.Display.width(), 32, settingsMode, settingsMode);
 }
 
-void drawNotes(const Notes15& notes15, const int startY, const int width, const int height, const int spacing, const bool firstDraw)
+void drawNotes(const Notes& notes, const int startY, const int width, const int height, const int spacing, const bool firstDraw)
 {
     // Calculate square size to fit 5 columns with spacing in given area
     const int availableWidth = width - (spacing * 6); // 6 spaces: left, 4 between, right
@@ -25,7 +25,7 @@ void drawNotes(const Notes15& notes15, const int startY, const int width, const 
     const int gridStartY = startY + (height - totalGridHeight) / 2;
 
     for (int i = 0; i < 15; i++) {
-        const bool isPressed = notes15.get(i) > 0;
+        const bool isPressed = notes.get(i) > 0;
 
         if (firstDraw || isPressed != prevPressed[i]) {
             const int col = i % 5;

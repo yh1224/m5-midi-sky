@@ -5,7 +5,7 @@
 
 void resetDisplay(bool settingsMode);
 
-void drawNotes(const Notes15& notes15, int startY, int width, int height, int spacing, bool firstDraw);
+void drawNotes(const Notes& notes, int startY, int width, int height, int spacing, bool firstDraw);
 
 void drawButtons(int startY, int width, int height, bool buttonA, bool buttonC);
 

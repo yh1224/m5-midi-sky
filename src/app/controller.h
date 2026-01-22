@@ -3,7 +3,7 @@
 
 #include "app/notes.h"
 
-void updateController(const Notes15& notes15, int mapping);
+void updateController(const Notes& notes, int mapping);
 
 void setupController(const char *deviceName, const char *deviceManufacturer);
 

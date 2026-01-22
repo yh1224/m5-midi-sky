@@ -77,15 +77,15 @@ const MappingEntry* mappings[] = {
 static NSGamepad gamepad;
 
 // Filter to prevent old notes from reappearing
-static Notes15Filter noteFilter;
+static NotesFilter noteFilter;
 
-static void applyMIDIToNSwitchGamepad(const Notes15& notes15, const int mapping)
+static void applyMIDIToNSwitchGamepad(const Notes& notes, const int mapping)
 {
     // Get mapping
     const MappingEntry* currentMapping = mappings[mapping - 1];
 
     // Limit to latest notes for gamepad
-    const Notes15 latestNotes15 = noteFilter.latest(notes15, MAX_SIMULTANEOUS_NOTES);
+    const Notes latestNotes = noteFilter.latest(notes, MAX_SIMULTANEOUS_NOTES);
 
     // Variables for accumulating stick input (Nintendo Switch typically uses 0-255 range)
     uint8_t leftStickX = 128, leftStickY = 128; // Center position
@@ -99,7 +99,7 @@ static void applyMIDIToNSwitchGamepad(const Notes15& notes15, const int mapping)
 
     // Process 15-pitch array
     for (int i = 0; i < 15; i++) {
-        if (latestNotes15.get(i) != 0) {
+        if (latestNotes.get(i) != 0) {
             const MappingEntry& mappingEntry = currentMapping[i];
             switch (mappingEntry.type) {
             case ACTION_BUTTON:
@@ -182,14 +182,14 @@ static void applyMIDIToNSwitchGamepad(const Notes15& notes15, const int mapping)
     gamepad.loop();
 }
 
-void updateController(const Notes15& notes15, const int mapping)
+void updateController(const Notes& notes, const int mapping)
 {
     M5.Display.setCursor(0, 0);
     M5.Display.setTextColor(TFT_PURPLE, TFT_BLACK);
     M5.Display.println("USB Nintendo Switch");
 
     // MIDI to gamepad processing
-    applyMIDIToNSwitchGamepad(notes15, mapping);
+    applyMIDIToNSwitchGamepad(notes, mapping);
 }
 
 void setupController(const char* deviceName, const char* deviceManufacturer)

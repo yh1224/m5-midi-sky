@@ -1,12 +1,12 @@
 #if !defined(APP_NOTES_H)
 #define APP_NOTES_H
 
-class Notes15
+class Notes
 {
 public:
-    Notes15() = default;
+    Notes() = default;
 
-    explicit Notes15(const unsigned long timestamps[15])
+    explicit Notes(const unsigned long timestamps[15])
     {
         for (int i = 0; i < 15; i++) {
             this->timestamps[i] = timestamps[i];
@@ -21,7 +21,7 @@ public:
         return 0;
     }
 
-    bool operator!=(const Notes15& other) const
+    bool operator!=(const Notes& other) const
     {
         for (int i = 0; i < 15; i++) {
             if (timestamps[i] != other.timestamps[i]) {
@@ -36,10 +36,10 @@ private:
 };
 
 // Stateful filter to prevent old notes from reappearing
-class Notes15Filter
+class NotesFilter
 {
 public:
-    Notes15 latest(const Notes15& notes15, const int num)
+    Notes latest(const Notes& notes, const int num)
     {
         unsigned long newTimestamps[15] = {0};
         bool used[15] = {false};
@@ -48,7 +48,7 @@ public:
             unsigned long maxVal = 0;
             int maxIdx = -1;
             for (int i = 0; i < 15; i++) {
-                const unsigned long timestamp = notes15.get(i);
+                const unsigned long timestamp = notes.get(i);
                 // Only consider notes that are currently pressed AND newer than cutoff
                 if (!used[i] && timestamp > 0 && timestamp > cutoffThreshold && timestamp > maxVal) {
                     maxVal = timestamp;
@@ -65,14 +65,14 @@ public:
         // Update cutoff threshold: find the oldest unselected note that's newer than current cutoff
         unsigned long maxUnselectedTimestamp = cutoffThreshold;
         for (int i = 0; i < 15; i++) {
-            const unsigned long timestamp = notes15.get(i);
+            const unsigned long timestamp = notes.get(i);
             if (!used[i] && timestamp > cutoffThreshold && timestamp > maxUnselectedTimestamp) {
                 maxUnselectedTimestamp = timestamp;
             }
         }
         cutoffThreshold = maxUnselectedTimestamp;
 
-        return Notes15(newTimestamps);
+        return Notes(newTimestamps);
     }
 
 private:

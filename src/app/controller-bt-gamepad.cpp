@@ -83,15 +83,15 @@ static BleCompositeHID* bleHID;
 static XboxGamepadDevice* gamepad;
 
 // Filter to prevent old notes from reappearing
-static Notes15Filter noteFilter;
+static NotesFilter noteFilter;
 
-static void applyMIDIToGamepad(const Notes15& notes15, const int mapping)
+static void applyMIDIToGamepad(const Notes& notes, const int mapping)
 {
     // Get mapping
     const MappingEntry* currentMapping = mappings[mapping - 1];
 
     // Limit to latest notes for gamepad
-    const Notes15 latestNotes15 = noteFilter.latest(notes15, MAX_SIMULTANEOUS_NOTES);
+    const Notes latestNotes = noteFilter.latest(notes, MAX_SIMULTANEOUS_NOTES);
 
     gamepad->resetInputs();
 
@@ -103,7 +103,7 @@ static void applyMIDIToGamepad(const Notes15& notes15, const int mapping)
     bool dpadPressed[4] = {false}; // NORTH, SOUTH, EAST, WEST
 
     for (int i = 0; i < 15; i++) {
-        if (latestNotes15.get(i) != 0) {
+        if (latestNotes.get(i) != 0) {
             const MappingEntry& mappingEntry = currentMapping[i];
             switch (mappingEntry.type) {
             case ACTION_BUTTON:
@@ -181,7 +181,7 @@ static void applyMIDIToGamepad(const Notes15& notes15, const int mapping)
     gamepad->sendGamepadReport();
 }
 
-void updateController(const Notes15& notes15, const int mapping)
+void updateController(const Notes& notes, const int mapping)
 {
     M5.Display.setCursor(0, 0);
     M5.Display.setTextColor(TFT_BLUE, TFT_BLACK);
@@ -191,7 +191,7 @@ void updateController(const Notes15& notes15, const int mapping)
     if (bleHID->isConnected()) {
         M5.Display.println("Connected       ");
 
-        applyMIDIToGamepad(notes15, mapping);
+        applyMIDIToGamepad(notes, mapping);
     } else {
         M5.Display.println("                ");
     }

@@ -125,7 +125,7 @@ void setSustainEnabled(const bool enabled)
     }
 }
 
-Notes15 getNotes15(const int baseNote, const bool expand)
+Notes getNotes(const int baseNote, const bool expand)
 {
     // 15 pitches
     const static int noteMapping[15] = {
@@ -179,7 +179,7 @@ Notes15 getNotes15(const int baseNote, const bool expand)
         }
     }
 
-    return Notes15(timestamps);
+    return Notes(timestamps);
 }
 
 void drawKeyboard(const int startY, const int width, const int height, const int baseNote)

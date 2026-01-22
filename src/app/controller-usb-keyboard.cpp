@@ -44,23 +44,23 @@ const MappingEntry* mappings[] = {
 static USBHIDKeyboard keyboard;
 
 // Filter to prevent old notes from reappearing
-static Notes15Filter noteFilter;
+static NotesFilter noteFilter;
 
 // Previous state
-static Notes15 prevNotes15;
+static Notes prevNotes;
 
-static void applyMIDIToUSBKeyboard(const Notes15& notes15, const int mapping)
+static void applyMIDIToUSBKeyboard(const Notes& notes, const int mapping)
 {
     // Get mapping
     const MappingEntry* currentMapping = mappings[mapping - 1];
 
     // Limit to latest keys for USB keyboard
-    const Notes15 latestNotes15 = noteFilter.latest(notes15, MAX_SIMULTANEOUS_NOTES);
+    const Notes latestNotes = noteFilter.latest(notes, MAX_SIMULTANEOUS_NOTES);
 
     // Process 15-pitch array
     for (int i = 0; i < 15; i++) {
-        const bool currentState = latestNotes15.get(i) != 0;
-        const bool prevState = prevNotes15.get(i) != 0;
+        const bool currentState = latestNotes.get(i) != 0;
+        const bool prevState = prevNotes.get(i) != 0;
 
         // Send key event only when state changes
         if (currentState && !prevState) {
@@ -73,17 +73,17 @@ static void applyMIDIToUSBKeyboard(const Notes15& notes15, const int mapping)
     }
 
     // Update previous state
-    prevNotes15 = notes15;
+    prevNotes = notes;
 }
 
-void updateController(const Notes15& notes15, const int mapping)
+void updateController(const Notes& notes, const int mapping)
 {
     M5.Display.setCursor(0, 0);
     M5.Display.setTextColor(TFT_CYAN, TFT_BLACK);
     M5.Display.println("USB Keyboard");
 
     // MIDI to keyboard processing
-    applyMIDIToUSBKeyboard(notes15, mapping);
+    applyMIDIToUSBKeyboard(notes, mapping);
 }
 
 void setupController(const char* deviceName, const char* deviceManufacturer)
