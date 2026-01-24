@@ -4,40 +4,51 @@
 #include <USB.h>
 #include <USBHIDKeyboard.h>
 
+#include <map>
+
 #include "app/controller.h"
 
 // Maximum simultaneous notes
 static constexpr int MAX_SIMULTANEOUS_NOTES = 5;
 
-// Keyboard mapping entry structure
-struct MappingEntry
-{
-    char key;
-};
-
-// Mapping 1
-const MappingEntry mapping1[15] = {
-    {'y'},
-    {'u'},
-    {'i'},
-    {'o'},
-    {'p'},
-    {'h'},
-    {'j'},
-    {'k'},
-    {'l'},
-    {';'},
-    {'n'},
-    {'m'},
-    {','},
-    {'.'},
-    {'/'},
-};
-
 // Mapping table
-const MappingEntry* mappings[] = {
-    mapping1,
-    mapping1,
+static const std::map<int, char> mappings[] = {
+    // Mapping 1
+    {
+        {0, 'y'},
+        {2, 'u'},
+        {4, 'i'},
+        {5, 'o'},
+        {7, 'p'},
+        {9, 'h'},
+        {11, 'j'},
+        {12, 'k'},
+        {14, 'l'},
+        {16, ';'},
+        {17, 'n'},
+        {19, 'm'},
+        {21, ','},
+        {23, '.'},
+        {24, '/'},
+    },
+    // Mapping 2
+    {
+        {0, 'y'},
+        {2, 'u'},
+        {4, 'i'},
+        {5, 'o'},
+        {7, 'p'},
+        {9, 'h'},
+        {11, 'j'},
+        {12, 'k'},
+        {14, 'l'},
+        {16, ';'},
+        {17, 'n'},
+        {19, 'm'},
+        {21, ','},
+        {23, '.'},
+        {24, '/'},
+    },
 };
 
 // keyboard device instance
@@ -47,28 +58,27 @@ static USBHIDKeyboard keyboard;
 static NotesFilter noteFilter;
 
 // Previous state
-static Notes prevNotes{15};
+static Notes prevNotes{25};
 
 static void applyMIDIToUSBKeyboard(const Notes& notes, const int mapping)
 {
     // Get mapping
-    const MappingEntry* currentMapping = mappings[mapping - 1];
+    const std::map<int, char>& currentMapping = mappings[mapping - 1];
 
     // Limit to latest keys for USB keyboard
     const Notes latestNotes = noteFilter.latest(notes, MAX_SIMULTANEOUS_NOTES);
 
-    // Process 15-pitch array
-    for (int i = 0; i < 15; i++) {
-        const bool currentState = latestNotes.get(i) != 0;
-        const bool prevState = prevNotes.get(i) != 0;
+    for (const auto& [noteIndex, key] : currentMapping) {
+        const bool currentState = latestNotes.get(noteIndex) != 0;
+        const bool prevState = prevNotes.get(noteIndex) != 0;
 
         // Send key event only when state changes
         if (currentState && !prevState) {
             // Key pressed
-            keyboard.press(currentMapping[i].key);
+            keyboard.press(key);
         } else if (!currentState && prevState) {
             // Key released
-            keyboard.release(currentMapping[i].key);
+            keyboard.release(key);
         }
     }
 

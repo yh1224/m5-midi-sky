@@ -3,6 +3,10 @@
 #include "app/display.h"
 #include "app/midi.h"
 
+// White key indices (C, D, E, F, G, A, B pattern for 2 octaves + C)
+static constexpr int displayNoteIndices[15] = {
+    0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19, 21, 23, 24,
+};
 static bool prevPressed[15] = {false};
 
 void resetDisplay(const bool settingsMode)
@@ -25,7 +29,8 @@ void drawNotes(const Notes& notes, const int startY, const int width, const int 
     const int gridStartY = startY + (height - totalGridHeight) / 2;
 
     for (int i = 0; i < 15; i++) {
-        const bool isPressed = notes.get(i) > 0;
+        const int noteIndex = displayNoteIndices[i];
+        const bool isPressed = notes.get(noteIndex) > 0;
 
         if (firstDraw || isPressed != prevPressed[i]) {
             const int col = i % 5;

@@ -5,6 +5,8 @@
 #include <XboxGamepadDevice.h>
 #include <XboxGamepadConfiguration.h>
 
+#include <map>
+
 #include "app/controller.h"
 
 // Maximum simultaneous notes
@@ -32,48 +34,44 @@ struct MappingEntry
     int value;
 };
 
-// Mapping 1
-const MappingEntry mapping1[15] = {
-    {ACTION_L_TRIGGER, 1023}, // LT
-    {ACTION_R_TRIGGER, 1023}, // RT
-    {ACTION_DPAD, DIRECTION_DOWN}, // D-Pad ↓
-    {ACTION_BUTTON, XBOX_BUTTON_A}, // A
-    {ACTION_DPAD, DIRECTION_LEFT}, // D-Pad ←
-    {ACTION_BUTTON, XBOX_BUTTON_X}, // X
-    {ACTION_DPAD, DIRECTION_UP}, // D-Pad ↑
-    {ACTION_BUTTON, XBOX_BUTTON_Y}, // Y
-    {ACTION_DPAD, DIRECTION_RIGHT}, // D-Pad →
-    {ACTION_BUTTON, XBOX_BUTTON_B}, // B
-    {ACTION_BUTTON, XBOX_BUTTON_LB}, // LB
-    {ACTION_BUTTON, XBOX_BUTTON_RB}, // RB
-    {ACTION_L_STICK, DIRECTION_LEFT}, // L-Stick ←
-    {ACTION_R_STICK, DIRECTION_LEFT}, // R-Stick ←
-    {ACTION_L_STICK, DIRECTION_RIGHT}, // L-Stick →
-};
-
-// Mapping 2
-const MappingEntry mapping2[15] = {
-    {ACTION_DPAD, DIRECTION_DOWN}, // D-Pad ↓
-    {ACTION_DPAD, DIRECTION_LEFT}, // D-Pad ←
-    {ACTION_DPAD, DIRECTION_UP}, // D-Pad ↑
-    {ACTION_L_STICK, DIRECTION_DOWN}, // L-Stick ↓
-    {ACTION_L_STICK, DIRECTION_LEFT}, // L-Stick ←
-    {ACTION_BUTTON, XBOX_BUTTON_LB}, // LB
-    {ACTION_L_TRIGGER, 1023}, // LT
-    {ACTION_R_STICK, DIRECTION_DOWN}, // R-Stick ↓
-    {ACTION_R_STICK, DIRECTION_RIGHT}, // R-Stick →
-    {ACTION_R_STICK, DIRECTION_UP}, // R-Stick ↑
-    {ACTION_BUTTON, XBOX_BUTTON_A}, // A
-    {ACTION_BUTTON, XBOX_BUTTON_B}, // B
-    {ACTION_BUTTON, XBOX_BUTTON_Y}, // Y
-    {ACTION_BUTTON, XBOX_BUTTON_RB}, // RB
-    {ACTION_R_TRIGGER, 1023}, // RT
-};
-
 // Mapping table
-const MappingEntry* mappings[] = {
-    mapping1,
-    mapping2,
+static const std::map<int, MappingEntry> mappings[] = {
+    // Mapping 1
+    {
+        {0, {ACTION_L_TRIGGER, 1023}}, // LT
+        {2, {ACTION_R_TRIGGER, 1023}}, // RT
+        {4, {ACTION_DPAD, DIRECTION_DOWN}}, // D-Pad ↓
+        {5, {ACTION_BUTTON, XBOX_BUTTON_A}}, // A
+        {7, {ACTION_DPAD, DIRECTION_LEFT}}, // D-Pad ←
+        {9, {ACTION_BUTTON, XBOX_BUTTON_X}}, // X
+        {11, {ACTION_DPAD, DIRECTION_UP}}, // D-Pad ↑
+        {12, {ACTION_BUTTON, XBOX_BUTTON_Y}}, // Y
+        {14, {ACTION_DPAD, DIRECTION_RIGHT}}, // D-Pad →
+        {16, {ACTION_BUTTON, XBOX_BUTTON_B}}, // B
+        {17, {ACTION_BUTTON, XBOX_BUTTON_LB}}, // LB
+        {19, {ACTION_BUTTON, XBOX_BUTTON_RB}}, // RB
+        {21, {ACTION_L_STICK, DIRECTION_LEFT}}, // L-Stick ←
+        {23, {ACTION_R_STICK, DIRECTION_LEFT}}, // R-Stick ←
+        {24, {ACTION_L_STICK, DIRECTION_RIGHT}}, // L-Stick →
+    },
+    // Mapping 2
+    {
+        {0, {ACTION_DPAD, DIRECTION_DOWN}}, // D-Pad ↓
+        {2, {ACTION_DPAD, DIRECTION_LEFT}}, // D-Pad ←
+        {4, {ACTION_DPAD, DIRECTION_UP}}, // D-Pad ↑
+        {5, {ACTION_L_STICK, DIRECTION_DOWN}}, // L-Stick ↓
+        {7, {ACTION_L_STICK, DIRECTION_LEFT}}, // L-Stick ←
+        {9, {ACTION_BUTTON, XBOX_BUTTON_LB}}, // LB
+        {11, {ACTION_L_TRIGGER, 1023}}, // LT
+        {12, {ACTION_R_STICK, DIRECTION_DOWN}}, // R-Stick ↓
+        {14, {ACTION_R_STICK, DIRECTION_RIGHT}}, // R-Stick →
+        {16, {ACTION_R_STICK, DIRECTION_UP}}, // R-Stick ↑
+        {17, {ACTION_BUTTON, XBOX_BUTTON_A}}, // A
+        {19, {ACTION_BUTTON, XBOX_BUTTON_B}}, // B
+        {21, {ACTION_BUTTON, XBOX_BUTTON_Y}}, // Y
+        {23, {ACTION_BUTTON, XBOX_BUTTON_RB}}, // RB
+        {24, {ACTION_R_TRIGGER, 1023}}, // RT
+    },
 };
 
 // Bluetooth HID composite device
@@ -88,7 +86,7 @@ static NotesFilter noteFilter;
 static void applyMIDIToGamepad(const Notes& notes, const int mapping)
 {
     // Get mapping
-    const MappingEntry* currentMapping = mappings[mapping - 1];
+    const std::map<int, MappingEntry>& currentMapping = mappings[mapping - 1];
 
     // Limit to latest notes for gamepad
     const Notes latestNotes = noteFilter.latest(notes, MAX_SIMULTANEOUS_NOTES);
@@ -102,9 +100,8 @@ static void applyMIDIToGamepad(const Notes& notes, const int mapping)
     // DPad state
     bool dpadPressed[4] = {false}; // NORTH, SOUTH, EAST, WEST
 
-    for (int i = 0; i < 15; i++) {
-        if (latestNotes.get(i) != 0) {
-            const MappingEntry& mappingEntry = currentMapping[i];
+    for (const auto& [noteIndex, mappingEntry] : currentMapping) {
+        if (latestNotes.get(noteIndex) != 0) {
             switch (mappingEntry.type) {
             case ACTION_BUTTON:
                 gamepad->press(mappingEntry.value);

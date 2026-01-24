@@ -125,19 +125,12 @@ void setSustainEnabled(const bool enabled)
     }
 }
 
-Notes getNotes(const int numNotes, const int noteMapping[], const int baseNote, const bool expand)
+Notes getNotes(const int baseNote, const int numNotes, const bool expand)
 {
     // Initialize output array to 0 (not pressed)
     auto timestamps = std::make_unique<unsigned long[]>(numNotes);
     for (int i = 0; i < numNotes; i++) {
         timestamps[i] = 0;
-    }
-
-    int maxNote = 0;
-    for (int i = 0; i < numNotes; i++) {
-        if (maxNote < noteMapping[i]) {
-            maxNote = noteMapping[i];
-        }
     }
 
     const unsigned long currentTime = millis();
@@ -164,22 +157,18 @@ Notes getNotes(const int numNotes, const int noteMapping[], const int baseNote, 
             while (targetNote < 0) {
                 targetNote += 12; // +1 octave
             }
-            while (targetNote > maxNote) {
+            while (targetNote >= numNotes) {
                 targetNote -= 12; // -1 octave
             }
-        } else if (targetNote < 0 || targetNote > maxNote) {
+        } else if (targetNote < 0 || targetNote >= numNotes) {
             // ignore outside
             continue;
         }
 
-        // Find corresponding index in pitch array
-        for (int i = 0; i < numNotes; i++) {
-            if (noteMapping[i] == targetNote) {
-                // Keep the latest timestamp for each position
-                if (timestamps[i] == 0 || notes[midiNote] > timestamps[i]) {
-                    timestamps[i] = notes[midiNote];
-                }
-                break;
+        if (targetNote >= 0 && targetNote < numNotes) {
+            // Keep the latest timestamp for each position
+            if (timestamps[targetNote] == 0 || notes[midiNote] > timestamps[targetNote]) {
+                timestamps[targetNote] = notes[midiNote];
             }
         }
     }

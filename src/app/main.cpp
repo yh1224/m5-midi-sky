@@ -7,9 +7,6 @@
 #include "app/midi.h"
 #include "app/settings.h"
 
-static constexpr int noteMapping[15] = {
-    0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19, 21, 23, 24,
-};
 
 void setup()
 {
@@ -37,7 +34,7 @@ void loop()
     static bool previousSettingsMode = false;
 
     // Previous notes state
-    static Notes prevNotes{15};
+    static Notes prevNotes{25};
 
     // Touch state tracking for one-touch detection
     static bool wasTouchPressed = false;
@@ -90,18 +87,18 @@ void loop()
 
 #if defined(MODE_TEST)
     // test mode
-    static int testIndex = 14;
+    static int testIndex = 24;
     static unsigned long testPrevTs = 0;
     const unsigned long ts = millis();
     if (ts - testPrevTs > 500) {
         testPrevTs = ts;
-        testIndex = ++testIndex % 15;
+        testIndex = ++testIndex % 25;
     }
-    unsigned long testTimestamps[15] = {0};
+    unsigned long testTimestamps[25] = {0};
     testTimestamps[testIndex] = ts;
-    const Notes notes{testTimestamps};
+    const Notes notes{25, testTimestamps};
 #else
-    const Notes notes = getNotes(15, noteMapping, settings.getBaseNote(), settings.getExpand());
+    const Notes notes = getNotes(settings.getBaseNote(), 25, settings.getExpand());
 #endif
     // Update controller if there are changes
     if (firstDraw || notes != prevNotes) {

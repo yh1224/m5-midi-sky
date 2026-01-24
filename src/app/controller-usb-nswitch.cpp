@@ -3,6 +3,8 @@
 #include <M5Unified.h>
 #include <switch_ESP32.h>
 
+#include <map>
+
 #include "app/controller.h"
 
 // Maximum simultaneous notes
@@ -29,48 +31,44 @@ struct MappingEntry
     int value;
 };
 
-// Mapping 1
-const MappingEntry mapping1[15] = {
-    {ACTION_L_TRIGGER, 255}, // ZL
-    {ACTION_R_TRIGGER, 255}, // ZR
-    {ACTION_DPAD, DIRECTION_DOWN}, // D-Pad ↓
-    {ACTION_BUTTON, NSButton_B}, // B
-    {ACTION_DPAD, DIRECTION_LEFT}, // D-Pad ←
-    {ACTION_BUTTON, NSButton_Y}, // Y
-    {ACTION_DPAD, DIRECTION_UP}, // D-Pad ↑
-    {ACTION_BUTTON, NSButton_X}, // X
-    {ACTION_DPAD, DIRECTION_RIGHT}, // D-Pad →
-    {ACTION_BUTTON, NSButton_A}, // A
-    {ACTION_BUTTON, NSButton_LeftTrigger}, // L
-    {ACTION_BUTTON, NSButton_RightTrigger}, // R
-    {ACTION_L_STICK, DIRECTION_LEFT}, // L-Stick ←
-    {ACTION_R_STICK, DIRECTION_LEFT}, // R-Stick ←
-    {ACTION_L_STICK, DIRECTION_RIGHT}, // L-Stick →
-};
-
-// Mapping 2
-const MappingEntry mapping2[15] = {
-    {ACTION_DPAD, DIRECTION_DOWN}, // D-Pad ↓
-    {ACTION_DPAD, DIRECTION_LEFT}, // D-Pad ←
-    {ACTION_DPAD, DIRECTION_UP}, // D-Pad ↑
-    {ACTION_L_STICK, DIRECTION_DOWN}, // L-Stick ↓
-    {ACTION_L_STICK, DIRECTION_LEFT}, // L-Stick ←
-    {ACTION_BUTTON, NSButton_LeftTrigger}, // L
-    {ACTION_L_TRIGGER, 255}, // ZL
-    {ACTION_R_STICK, DIRECTION_DOWN}, // R-Stick ↓
-    {ACTION_R_STICK, DIRECTION_RIGHT}, // R-Stick →
-    {ACTION_R_STICK, DIRECTION_UP}, // R-Stick ↑
-    {ACTION_BUTTON, NSButton_B}, // B
-    {ACTION_BUTTON, NSButton_A}, // A
-    {ACTION_BUTTON, NSButton_X}, // X
-    {ACTION_BUTTON, NSButton_RightTrigger}, // R
-    {ACTION_R_TRIGGER, 255}, // ZR
-};
-
 // Mapping table
-const MappingEntry* mappings[] = {
-    mapping1,
-    mapping2,
+static const std::map<int, MappingEntry> mappings[] = {
+    // Mapping 1
+    {
+        {0, {ACTION_L_TRIGGER, 255}}, // ZL
+        {2, {ACTION_R_TRIGGER, 255}}, // ZR
+        {4, {ACTION_DPAD, DIRECTION_DOWN}}, // D-Pad ↓
+        {5, {ACTION_BUTTON, NSButton_B}}, // B
+        {7, {ACTION_DPAD, DIRECTION_LEFT}}, // D-Pad ←
+        {9, {ACTION_BUTTON, NSButton_Y}}, // Y
+        {11, {ACTION_DPAD, DIRECTION_UP}}, // D-Pad ↑
+        {12, {ACTION_BUTTON, NSButton_X}}, // X
+        {14, {ACTION_DPAD, DIRECTION_RIGHT}}, // D-Pad →
+        {16, {ACTION_BUTTON, NSButton_A}}, // A
+        {17, {ACTION_BUTTON, NSButton_LeftTrigger}}, // L
+        {19, {ACTION_BUTTON, NSButton_RightTrigger}}, // R
+        {21, {ACTION_L_STICK, DIRECTION_LEFT}}, // L-Stick ←
+        {23, {ACTION_R_STICK, DIRECTION_LEFT}}, // R-Stick ←
+        {24, {ACTION_L_STICK, DIRECTION_RIGHT}}, // L-Stick →
+    },
+    // Mapping 2
+    {
+        {0, {ACTION_DPAD, DIRECTION_DOWN}}, // D-Pad ↓
+        {2, {ACTION_DPAD, DIRECTION_LEFT}}, // D-Pad ←
+        {4, {ACTION_DPAD, DIRECTION_UP}}, // D-Pad ↑
+        {5, {ACTION_L_STICK, DIRECTION_DOWN}}, // L-Stick ↓
+        {7, {ACTION_L_STICK, DIRECTION_LEFT}}, // L-Stick ←
+        {9, {ACTION_BUTTON, NSButton_LeftTrigger}}, // L
+        {11, {ACTION_L_TRIGGER, 255}}, // ZL
+        {12, {ACTION_R_STICK, DIRECTION_DOWN}}, // R-Stick ↓
+        {14, {ACTION_R_STICK, DIRECTION_RIGHT}}, // R-Stick →
+        {16, {ACTION_R_STICK, DIRECTION_UP}}, // R-Stick ↑
+        {17, {ACTION_BUTTON, NSButton_B}}, // B
+        {19, {ACTION_BUTTON, NSButton_A}}, // A
+        {21, {ACTION_BUTTON, NSButton_X}}, // X
+        {23, {ACTION_BUTTON, NSButton_RightTrigger}}, // R
+        {24, {ACTION_R_TRIGGER, 255}}, // ZR
+    },
 };
 
 // gamepad device instance
@@ -82,7 +80,7 @@ static NotesFilter noteFilter;
 static void applyMIDIToNSwitchGamepad(const Notes& notes, const int mapping)
 {
     // Get mapping
-    const MappingEntry* currentMapping = mappings[mapping - 1];
+    const std::map<int, MappingEntry>& currentMapping = mappings[mapping - 1];
 
     // Limit to latest notes for gamepad
     const Notes latestNotes = noteFilter.latest(notes, MAX_SIMULTANEOUS_NOTES);
@@ -97,10 +95,8 @@ static void applyMIDIToNSwitchGamepad(const Notes& notes, const int mapping)
     // Clear button state
     gamepad.releaseAll();
 
-    // Process 15-pitch array
-    for (int i = 0; i < 15; i++) {
-        if (latestNotes.get(i) != 0) {
-            const MappingEntry& mappingEntry = currentMapping[i];
+    for (const auto& [noteIndex, mappingEntry] : currentMapping) {
+        if (latestNotes.get(noteIndex) != 0) {
             switch (mappingEntry.type) {
             case ACTION_BUTTON:
                 gamepad.press(mappingEntry.value);
