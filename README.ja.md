@@ -16,6 +16,7 @@ M5Stack ベースの MIDI to GamePad コンバーターで、MIDI 音符入力�
 - **マッピング切り替え**: 複数の異なるボタン/制御マッピング
 - **基準音設定 (トランスポーズアシスト)**: MIDI 入力の基準音を設定でき、異なるキーの楽譜を直接演奏可能
 - **拡張モード**: 範囲外の鍵盤も演奏可能な範囲にフォールディング
+- **サスティンペダル対応**: MIDI サスティンペダル（CC64）に対応し、持続音の演奏が可能
 
 ## ハードウェア要件
 
@@ -114,7 +115,7 @@ pio run -t upload -e M5Stack-CoreS3-USB-GAMEPAD
 ### コントロール
 
 - **Button A**: 現在の設定値を減少 (設定が選択されている時)
-- **Button B**: 設定項目を切り替え (None → Mapping → Base Note → Expand → None...)
+- **Button B**: 設定項目を切り替え (None → Mapping → Base Note → Expand → Sustain → None...)
 - **Button C**: 現在の設定値を増加 (設定が選択されている時)
 
 #### 設定メニュー
@@ -123,6 +124,7 @@ pio run -t upload -e M5Stack-CoreS3-USB-GAMEPAD
 - **Mapping**: A/C ボタンでマッピングモード (1-2) を切り替え
 - **Base note**: 基準音を設定 - A/C ボタンで半音単位で設定
 - **Expand**: A/C ボタンで拡張モード (ON/OFF) を切り替え - ON の場合、範囲外の鍵盤も演奏可能な範囲にフォールディング
+- **Sustain**: A/C ボタンでサスティンモード (ON/OFF) を切り替え - ON の場合、MIDI サスティンペダル (CC64) が有効になります
 
 ### MIDI 音符マッピング
 

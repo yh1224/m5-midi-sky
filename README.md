@@ -16,6 +16,7 @@ M5Stack-based MIDI to GamePad converter that translates MIDI note inputs into ga
 - **Mapping Switch**: Multiple button/control mappings
 - **Base Note Configuration (Transpose assist)**: Set the base note for your MIDI input, allowing you to play sheet music in different keys directly
 - **Expand Mode**: Notes outside the range are folded back into the playable range
+- **Sustain Pedal Support**: MIDI sustain pedal (CC64) is supported for sustained note playback
 
 ## Hardware Requirements
 
@@ -114,7 +115,7 @@ pio run -t upload -e M5Stack-CoreS3-USB-GAMEPAD
 ### Controls
 
 - **Button A**: Decrease current setting value (when a setting is selected)
-- **Button B**: Cycle through settings (None → Mapping → Base Note → Expand → None...)
+- **Button B**: Cycle through settings (None → Mapping → Base Note → Expand → Sustain → None...)
 - **Button C**: Increase current setting value (when a setting is selected)
 
 #### Settings Menu
@@ -123,6 +124,7 @@ pio run -t upload -e M5Stack-CoreS3-USB-GAMEPAD
 - **Mapping**: Switch between mapping modes (1-2) using A/C buttons
 - **Base note**: Set the base note - adjustable from C to B in semitones using A/C buttons
 - **Expand**: Toggle expand mode (ON/OFF) using A/C buttons - when enabled, notes outside the standard range are folded back into the playable range
+- **Sustain**: Toggle sustain mode (ON/OFF) using A/C buttons - when enabled, MIDI sustain pedal (CC64) is active
 
 ### MIDI Note Mapping
 
