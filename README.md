@@ -2,6 +2,8 @@
 
 *English | [日本語](README.ja.md)*
 
+![Photo](photo.jpg)
+
 M5Stack-based MIDI to GamePad converter that translates MIDI note inputs into gamepad controls. Supports multiple output modes including Bluetooth gamepads, USB gamepads, Nintendo Switch controllers, and USB keyboards.
 
 > [!IMPORTANT]

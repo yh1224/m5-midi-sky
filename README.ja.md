@@ -2,6 +2,8 @@
 
 *[English](README.md) | 日本語*
 
+![Photo](photo.jpg)
+
 M5Stack ベースの MIDI to GamePad コンバーターで、MIDI 音符入力をゲームパッド制御に変換します。Bluetooth ゲームパッド、USB ゲームパッド、Nintendo Switch コントローラー、USB キーボードなど、複数の出力モードをサポートしています。
 
 > [!IMPORTANT]
