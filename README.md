@@ -13,14 +13,14 @@ M5Stack-based MIDI to GamePad converter that translates MIDI note inputs into ga
 - **M5Stack Support**: Compatible with M5Stack Basic, Core2, and CoreS3
 - **MIDI Note Mapping**: Maps MIDI notes to controller inputs
 - **Settings Menu System**: Navigate settings with Button B, adjust values with Buttons A/C
-- **Dual Mapping System**: Two different button/control mappings
+- **Mapping Switch**: Multiple button/control mappings
 - **Base Note Configuration (Transpose assist)**: Set the base note for your MIDI input, allowing you to play sheet music in different keys directly
-- **Expand Mode**: Enable or disable notes outside the range
+- **Expand Mode**: Notes outside the range are folded back into the playable range
 
 ## Hardware Requirements
 
 - M5Stack device (Basic, Core2, or CoreS3)
-- [Unit MIDI](https://docs.m5stack.com/en/unit/Unit-MIDI)
+- Unit MIDI (https://docs.m5stack.com/en/unit/Unit-MIDI)
   - or MIDI Unit for GROVE by necobit (https://necobit.booth.pm/items/5806265)
 - For USB modes: M5Stack CoreS3 only
 
@@ -28,8 +28,8 @@ M5Stack-based MIDI to GamePad converter that translates MIDI note inputs into ga
 
 ```mermaid
 graph TD
-    A[MIDI Source Device<br/>🎹 Keyboard/Controller] 
-    B[Unit MIDI]
+    A[MIDI Source Device<br/>🎹 Keyboard/Controller]
+    B[MIDI Unit]
     C[M5Stack Device<br/>🖥️ Basic/Core2/CoreS3]
     D1[Target Device<br/>💻 PC/Mac/iPad]
     D2[Target Device<br/>📱 Smartphone/Tablet]
@@ -51,10 +51,10 @@ graph TD
 
 ### Connection Details
 
-- Connect MIDI source (keyboard, controller, etc.) to MIDI Unit for GROVE via standard MIDI cable
-- Connect MIDI Unit for GROVE to M5Stack's built-in GROVE port using GROVE cable
-- For USB modes: Connect M5Stack CoreS3 to target device via USB cable
-- For Bluetooth modes: Pair M5Stack with target device wirelessly
+- Connect MIDI source (keyboard, controller, etc.) to MIDI Unit via standard MIDI cable
+- Connect MIDI Unit to M5Stack's built-in GROVE port using GROVE cable
+- For USB modes: Connect M5Stack device to the target device via USB cable
+- For Bluetooth modes: Pair M5Stack with the target device wirelessly
 
 ## Installation
 
@@ -62,7 +62,7 @@ graph TD
 2. Clone this repository
 3. Create `config.h` from `config.h.template`
 4. Choose your target environment (see Build Environments below)
-5. **Important**: For USB modes, ensure the device is in Download Mode before uploading (see https://docs.m5stack.com/en/core/CoreS3)
+5. **Important**: For USB modes, ensure the M5Stack device is in Download Mode before uploading (see https://docs.m5stack.com/en/core/CoreS3)
 6. Build and upload to your M5Stack device
 
 ## Build Environments
@@ -102,15 +102,14 @@ pio run -t upload -e M5Stack-CoreS3-USB-GAMEPAD
 
 ### Basic Operation
 
-1. **Hardware Setup**: Connect Unit MIDI to M5Stack's built-in GROVE port
-2. **Power On**: The M5Stack will display a visual keyboard interface
-3. **MIDI Input**: Connect MIDI source to the appropriate GPIO pins:
+1. **Hardware Setup**: Connect MIDI Unit to M5Stack's GROVE PORT.A
    - M5Stack Basic: RX=22, TX=21
-   - M5Stack Core2: RX=33, TX=32  
+   - M5Stack Core2: RX=33, TX=32
    - M5Stack CoreS3: RX=1, TX=2
-4. **Controller Output**: 
-   - Bluetooth modes: Pair with target device
-   - USB modes: Connect M5Stack CoreS3 via USB cable
+2. **Power On**
+3. **Connect Controller**: 
+   - Bluetooth modes: Pair with ths target device
+   - USB modes: Connect M5Stack device to the target device via USB cable
 
 ### Controls
 
@@ -120,19 +119,19 @@ pio run -t upload -e M5Stack-CoreS3-USB-GAMEPAD
 
 #### Settings Menu
 
-- **None**: Initial state - A/C buttons are disabled, press B to select a setting
+- Initial state - A/C buttons are disabled, press B to select a setting
 - **Mapping**: Switch between mapping modes (1-2) using A/C buttons
-- **Base Note**: Set the base note - adjustable from C to B in semitones using A/C buttons
-- **Expand**: Toggle expand mode (ON/OFF) using A/C buttons - when enabled, notes outside the standard range are active
+- **Base note**: Set the base note - adjustable from C to B in semitones using A/C buttons
+- **Expand**: Toggle expand mode (ON/OFF) using A/C buttons - when enabled, notes outside the standard range are folded back into the playable range
 
 ### MIDI Note Mapping
 
 The system maps 15 specific MIDI notes to controller inputs:
 
-- **Note Range**: default from C3 to C5 (48, 50, 52, 53, 55, 57, 59, 60, 62, 64, 65, 67, 69, 71, 72)
+- **Note Range**: C3 to C5 (48, 50, 52, 53, 55, 57, 59, 60, 62, 64, 65, 67, 69, 71, 72) by default
 - **Mapping**: Each controller type has its own mapping table that converts these 15 positions to specific outputs
 - **Base Note**: Set the base note to shift the entire range
-- **Expand Mode**: When enabled, notes outside the standard range remain active
+- **Expand Mode**: When enabled, notes outside the range are folded back into the playable range
 
 ## Controller Compatibility
 
@@ -150,7 +149,6 @@ The system maps 15 specific MIDI notes to controller inputs:
 
 ### USB Keyboard
 
-- Emulates Logitech Unifying keyboard
 - **Tested devices**: macOS 15: Apple MacBook Pro (M1), Windows 11: Microsoft Surface Pro 7, Android 16: Google Pixel 7a
 - **Not working**: iOS 18: Apple iPad (10th gen.)
 
@@ -167,9 +165,6 @@ The system maps 15 specific MIDI notes to controller inputs:
 | macOS 15: Apple MacBook Pro (M1) | ✅ | ✅ | ✅ |
 | iOS 18: Apple iPad (10th gen.) | ✅ | ✅ | ❌ |
 | Android 16: Google Pixel 7a | ❌ | ❌ | ✅ |
-
-> [!NOTE]
-> Code contributions to improve compatibility with additional devices and platforms are welcome!
 
 ## Acknowledgments
 
