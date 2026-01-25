@@ -79,7 +79,6 @@ bool Settings::processButtons(const bool btnPressedA, const bool btnPressedB, co
             M5.Speaker.tone(2000, 100);
             if (btnPressedA || btnPressedC) {
                 _expand = !_expand;
-                setSustainEnabled(_expand);
             }
             changed = true;
             break;
